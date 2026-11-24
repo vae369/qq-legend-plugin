@@ -1,0 +1,1975 @@
+﻿
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Linq;
+using 传奇.core;
+using 传奇.Qiancao;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+
+namespace 传奇
+{
+    public class QQMain
+    {
+        static Dictionary<string, UserKey> qqKeyDic = new Dictionary<string, UserKey>();
+
+
+        public QQMain()
+        {
+
+        }
+
+        #region 程序分发所有事件,在此调用参数实现各种功能
+        /*
+         .版本 2
+
+        .参数 RobotQQ机器人QQ, 文本型, , 多QQ登录情况下用于识别是哪个Q
+        .参数 MsgType消息类型, 整数型, , 信息唯一标识-1 未定义事件 1,好友信息 2,群信息 3,讨论组信息 4,群临时会话 5,讨论组临时会话 6,在线状态临时会话
+        .参数 MsgCType消息子类型, 整数型, , 对象申请、被邀请入群事件下该值为1时即对象为不良成员
+        .参数 GroupQQ消息来源, 文本型, , 信息的源头  群号,好友QQ,讨论组ID,临时会话对象QQ等
+        .参数 FromQQ触发对象_主动, 文本型, , 主动触发这条信息的对象 T人时为T人的管理员QQ  
+        .参数 TigObjC触发对象_被动, 文本型, , 被动接受这条信息的对象 T人时为被T对象的QQ 
+        .参数 Msg消息内容, 文本型, , 视情况而定的信息内容  申请入群时为入群理由,添加好友为附加信息,T人之类的为空
+        .参数 MsgNum消息序号, 文本型, , 此Mini数暂定用于消息撤回
+        .参数 MsgID消息ID, 文本型, , 此Mini数暂定用于消息撤回
+        .参数 RawMsg原始信息, 文本型, , 经过解密后的封包字节数据或json结构信息
+        .参数 pText信息回传文本指针_Out, 整数型, , 信息回传指针. 视情况而定的返回附加文本信息  拒绝好友申请时则为拒绝理由 方式:’写到内存("测试",Mini_信息回传文本指针_Out)
+       */
+        /// <summary>
+        /// 纯白铃框架唯一消息入口的业务分发，由 QiancaoPlugin.onMessagev3 调用。
+        /// 旧框架 11 参 MQEvent 已由 MessageInfo 取代：QQ 号 -> openid，消息类型 -> Type。
+        /// </summary>
+        public static void HandleMessage(MessageInfo message)
+        {
+            int MsgType = (int)message.Type;
+            string GroupQQ = message.GroupId ?? "";
+            string FromQQ = message.UserKey;
+            try
+            {
+                switch (MsgType)
+                {
+                    case 0: // 群
+                    case 1: // 频道
+                    case 2: // 私聊
+                    case 3: // 频道私聊
+                        string msg = (message.Msg ?? "").Trim();
+                        Random rnd = new Random();
+                        IniFileHelper config = new IniFileHelper(LegendFilePath.ConfigString);
+                        var groups = config.Read("配置信息", "屏蔽消息群").Split(',');
+                        string sGM = config.Read("配置信息", "超级管理员");
+                        try
+                        {
+                            switch (msg)
+                            {
+                                case "屏蔽本群":
+                                    if (FromQQ == sGM)
+                                    {
+                                        LegendApi.BlockMessage(GroupQQ);
+                                        Bot.SendMessageEx(message, $"<@{FromQQ}> 操作成功! ", false, true);
+                                    }
+                                    break;
+                                case "清除注册信息":
+                                    if (FromQQ == sGM)
+                                    {
+                                        if (UserInfoApi.ClearAllUserInfo(FromQQ))
+                                            Bot.SendMessageEx(message, $"清除完成! ", false, true);
+                                        else
+                                            Bot.SendMessageEx(message, $"你的权限不能使用该指令. ", false, true);
+                                    }
+                                    break;
+                                case "屏幕监视":
+                                    {
+                                        if (FromQQ == sGM)
+                                        {
+
+                                            Bot.SendMessageEx(message, $"当前有{rnd.Next(1, 10)}个人在玩,{rnd.Next(1, 15)}个人在看屏幕. ", false, true);
+                                        }
+                                        else
+                                        {
+                                            Bot.SendMessageEx(message, $"你的权限不能使用该指令. ", false, true);
+                                        }
+                                    }
+                                    break;
+                                case "自动挂机":
+                                    {
+                                        if (FromQQ == sGM)
+                                        {
+                                            Bot.SendMessageEx(message, $"成功加入挂机队列! ", false, true);
+                                        }
+                                        else
+                                        {
+                                            Bot.SendMessageEx(message, $"你的权限不能使用该指令. ", false, true);
+                                        }
+                                    }
+                                    break;
+                                case "功能":
+                                case "菜单": Bot.SendMessageEx(message, "咕咕鸡传奇指令说明文档：http://47.115.223.113", false, true); break;
+                                case "咕咕鸡传奇":
+                                case "传奇": LegendMenu(message); break;
+                                case "全部勾选":
+                                case "取消全部勾选":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        StoreApi.CheckedEquRecycle(user, msg);
+                                        string path = StoreApi.GetEquRecycle(user, "装备回收");
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "商铺":
+                                case "查看商铺":
+                                case "查看商铺装饰":
+                                case "查看商铺补给":
+                                case "查看商铺强化":
+                                case "查看商铺好友":
+                                case "查看商铺限量":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        string path = NPCApi.GetShopByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "查看垃圾系列":
+                                case "查看沃玛系列":
+                                case "查看祖玛系列":
+                                case "查看赤月系列":
+                                case "查看永恒首饰":
+                                case "查看永恒剑甲":
+                                case "查看毁灭首饰":
+                                case "查看毁灭剑甲":
+                                case "查看刑天首饰":
+                                case "查看焚天首饰":
+                                case "查看沧澜首饰":
+                                case "查看刑焚沧甲":
+                                case "查看刑焚沧剑":
+                                case "查看特殊物品":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        string path = StoreApi.GetEquRecycle(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "一键回收":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (StoreApi.EquRecycleByPb(user))
+                                        {
+                                            Bot.SendMessageEx(message, "一键回收装备不可撤销,请注意背包里的装备再发送信息,只有勾选的装备回收类型才会回收.", false, true);
+                                            UserInfoImg userInfoImg = new UserInfoImg(user);
+                                            string path = userInfoImg.GetBWGIMG(user);
+                                            Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                        }
+                                        else
+                                        {
+                                            Bot.SendMessageEx(message, "一键回收装备不可撤销,请注意背包里的装备再发送信息,只有勾选的装备回收类型才会回收.发送 装备回收 查看是否选中想要回收的装备.", false, true);
+                                        }
+                                    }
+                                    break;
+                                case "回收装备":
+                                case "装备回收":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+
+                                        string path = StoreApi.GetEquRecycle(user, "装备回收");
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "合成宝石":
+                                case "升级宝石1":
+                                case "升级宝石2":
+                                case "升级宝石3":
+                                case "升级宝石4":
+                                case "升级宝石5":
+                                case "升级宝石6":
+                                case "升级宝石7":
+                                case "升级宝石8":
+                                case "升级宝石9":
+                                case "升级宝石10":
+                                case "升级宝石11":
+                                case "升级宝石12":
+                                case "升级宝石13":
+                                case "升级宝石14":
+                                case "升级宝石15":
+                                case "合成普通斗笠":
+                                case "合成赤月斗笠":
+                                case "合成永恒斗笠":
+                                case "合成毁灭斗笠":
+                                case "合成沧天斗笠":
+                                case "合成灭世斗笠":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception(msg + "需要在盟重土城才能进行,请先前往盟重土城.");
+                                        msg = NPCApi.SyntheticItems(user, msg);
+                                        Bot.SendMessageEx(message, msg, false, true);
+                                    }
+                                    break;
+                                case "合成神器天尊":
+                                case "合成神器法神":
+                                case "合成神器圣战":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "沙漠荒原") throw new Exception(msg + "需要在沙漠荒原才能进行,请先前往沙漠荒原(三大陆).");
+                                        msg = NPCApi.SyntheticItems(user, msg);
+                                        Bot.SendMessageEx(message, msg, false, true);
+                                    }
+                                    break;
+                                case "世外高人":
+                                case "灭世斗笠":
+                                case "灭世宝石":
+                                case "灭世称号":
+                                case "灭世神技":
+                                case "高级宝石":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Map != "盟重土城") throw new Exception(msg + "需要在盟重土城才能查看,请先前往盟重土城.");
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(3, 7)}.jpg";
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "领取大彻大悟":
+                                case "提升神技":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Map != "盟重土城") throw new Exception(msg + "需要在盟重土城才能查看,请先前往盟重土城.");
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(3, 7)}.jpg";
+                                        msg = MagicApiImg.GetAcquiringSkills(user, msg);
+                                        Bot.SendMessageEx(message, msg, false, true);
+                                    }
+                                    break;
+                                case "升级永恒青铜":
+                                case "升级永恒白银":
+                                case "升级永恒黄金":
+                                case "升级永恒白金":
+                                case "升级永恒钻石":
+                                case "升级永恒星耀":
+                                case "升级永恒王者":
+                                case "升级永恒星辰":
+                                case "升级永恒魔王":
+                                case "升级永恒圣佛":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception("提升称号需要在盟重土城才能进行,请先前往盟重土城.");
+
+                                        LegendApi.GetUpgradeTitle(user, msg);
+
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(3, 7)}.jpg";
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string path = userInfoImg.GetUserTitleIMG(user, 0);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "充值使者":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "五大陆":
+                                case "轮回之地":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Map != "大帝之城" && user.Map != "盟重土城") throw new Exception("五大陆的地图在大帝之城才能查看,请先前往大帝之城(四大陆) 或 回盟重.");
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "情缘仙人":
+                                case "仙庭战鼓":
+                                case "天帝陵墓":
+                                case "天帝炼狱":
+                                case "天帝足球场":
+                                case "天帝后花园":
+                                case "天帝奴隶场":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "大帝之城") throw new Exception("仙庭战鼓NPC在大帝之城才能查看,请先前往大帝之城(四大陆) 或 回盟重.");
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "四大陆":
+                                case "大帝之城":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "沙漠荒原" && user.Map != "盟重土城") throw new Exception("四大陆的地图在沙漠荒原才能查看,请先前往沙漠荒原(三大陆) 或 回盟重.");
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "我要成佛":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "沙漠荒原") throw new Exception(msg + "需要在沙漠荒原才能进行,请先前往沙漠荒原(三大陆).");
+                                        string res = LegendApi.GetUserUpgradeGod(user);
+                                        Bot.SendMessageEx(message, res, false, true);
+                                    }
+                                    break;
+                                case "一转圣地":
+                                case "三转圣地":
+                                case "五转圣地":
+                                case "转生使者":
+                                case "我佛慈悲":
+                                case "三大神器合成":
+                                case "首饰盒神技":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "沙漠荒原") throw new Exception(msg + "需要在沙漠荒原才能查看,请先前往沙漠荒原(三大陆).");
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "三大陆":
+                                case "沙漠荒原":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "天宫仙境" && user.Map != "盟重土城") throw new Exception("三大陆的地图在天宫仙境才能查看,请先前往天宫仙境(二大陆) 或 回盟重.");
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "虚空无尽":
+                                case "缥缈之巅":
+                                case "幽暗村庄":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "天宫仙境") throw new Exception(msg + "需要在天宫仙境才能查看,请先前往天宫仙境(二大陆).");
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "二大陆":
+                                case "天宫仙境":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception("二大陆的地图在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(3, 8)}.jpg";
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "boss之家":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception("BOSS之家要在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(2, 5)}.jpg";
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "开启公益捐献":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception("开启公益捐献需要在盟重土城才能查看,请先前往盟重土城.");
+                                        msg = NPCApi.GetONGYJX(user);
+                                        string path = NPCApi.SendMessageImage(user, msg);
+                                        string group = GroupQQ;
+                                        foreach (string g in group.Split('#'))
+                                        {
+                                            if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                            {
+                                                Bot.SendMessageEx(message, msg, false, true);
+                                                Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case "公益捐献":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception("公益捐献需要在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + "地图\\4\\盟重土城\\4_3.jpg";
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "开启永恒之力":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception("开启永恒之力需要在盟重土城才能进行,请先前往盟重土城.");
+                                        msg = NPCApi.GetONYHZL(user);
+                                        string path = NPCApi.SendMessageImage(user, msg);
+
+                                        string group = GroupQQ;
+                                        foreach (string g in group.Split('#'))
+                                        {
+                                            if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                            {
+                                                Bot.SendMessageEx(message, msg, false, true);
+                                                Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case "永恒之力":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.Map != "盟重土城") throw new Exception("永恒之力需要在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + "地图\\4\\盟重土城\\4_2.jpg";
+                                        string path = NPCApi.GetNPCByName(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "领取充值":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        var list = UserInfoApi.UserClaimRecharge(user);
+
+                                        foreach (var msg1 in list)
+                                        {
+                                            string path = NPCApi.SendMessageImage(user, msg1);
+                                            string group = GroupQQ;
+                                            foreach (string g in group.Split('#'))
+                                            {
+                                                if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                                {
+                                                    Bot.SendMessageEx(message, msg1, false, true);
+                                                    Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case "赞助升级会员":
+                                case "元宝升级会员":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        msg = NPCApi.VIPUpgrade(user, msg);
+                                        string path = NPCApi.SendMessageImage(user, msg);
+
+                                        string group = GroupQQ;
+                                        foreach (string g in group.Split('#'))
+                                        {
+                                            if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                            {
+                                                Bot.SendMessageEx(message, msg, false, true);
+                                                Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case "赞助领取礼包1":
+                                case "赞助领取礼包2":
+                                case "赞助领取礼包3":
+                                case "白嫖领取礼包1":
+                                case "白嫖领取礼包2":
+                                case "白嫖领取礼包3":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+
+                                        msg = NPCApi.GetGifByCode2(user, msg);
+                                        string path = NPCApi.SendMessageImage(user, msg);
+                                        string group = GroupQQ;
+                                        foreach (string g in group.Split('#'))
+                                        {
+                                            if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                            {
+                                                Bot.SendMessageEx(message, msg, false, true);
+                                                Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case "赞助礼包":
+                                case "唯一赞助":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Map != "盟重土城") throw new Exception("唯一赞助礼包需要在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + "地图\\4\\盟重土城\\4_12.jpg";
+                                        string path = NPCApi.GetNPCByName(user, "唯一赞助");
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "起步礼包":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Map != "盟重土城") throw new Exception("起步礼包需要在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + "地图\\4\\盟重土城\\4_12.jpg";
+                                        string path = NPCApi.GetNPCByName(user, "起步礼包");
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "会员特权":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.User_General.VipLv == 0) throw new Exception("哦豁,对不起,您还不是会员哦,请输入 起步礼包 查看哦.");
+                                        string path = NPCApi.GetNPCByName(user, "会员特权");
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                    break;
+                                case "开启发送动图":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (UserInfoApi.SetUserIsOpenGifImg(user, true)) Bot.SendMessageEx(message, $"设置成功,发送动图已开启!签到,打怪功能正常发图.如需关闭请输入 关闭发送动图 即可关闭. ", false, true);
+                                    }
+                                    break;
+                                case "关闭发送动图":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        if (UserInfoApi.SetUserIsOpenGifImg(user, false))
+                                        {
+                                            Bot.SendMessageEx(message, $"设置成功,发送动图已关闭!签到,打怪功能都不会发送动图.如需开启请输入 开启发送动图 即可开启. ", false, true);
+                                        }
+                                    }
+                                    break;
+                                case "宣传码":
+                                case "路费":
+                                    {
+                                        UserKey userKey;
+                                        if (!qqKeyDic.ContainsKey(FromQQ))
+                                        {
+                                            userKey = new UserKey()
+                                            {
+                                                NikcName = Bot.GetUserName(message.AppId, FromQQ),
+                                                keyCount = 1,
+                                                ExpireTime = DateTime.Now
+                                            };
+                                            //userKey.cdKey = userKey.GenerateRandomNumber(32);
+                                            userKey.cdKey= LegendApi.GetXCM();
+                                            qqKeyDic.Add(FromQQ, userKey);
+                                            Bot.SendMessageEx(message, $"这是你的{msg}【{userKey.cdKey}】请在游戏中盟重土城的 宣传兑换充值 NPC进行兑换,只能使用一次。", false, true);
+
+                                        }
+                                        else
+                                        {
+                                            userKey = qqKeyDic[FromQQ];
+                                            if (userKey.ExpireTime.Day == DateTime.Now.Day && userKey.keyCount == 1)
+                                            {
+                                                Bot.SendMessageEx(message, $"对不起,每天只能获取1次. ", false, true);
+                                            }
+                                            else
+                                            {
+                                                userKey.cdKey = LegendApi.GetXCM();
+                                                userKey.ExpireTime = DateTime.Now;
+                                                qqKeyDic[FromQQ] = userKey;
+                                                Bot.SendMessageEx(message, $"这是你的{msg}【{userKey.cdKey}】请在游戏中盟重土城的 宣传兑换充值 NPC进行兑换,只能使用一次。", false, true);
+                                            }
+                                        }
+                                       
+                                        
+                                        return;
+                                    }
+                                case "补签":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (DateTime.Now.Day == user.UserCountersignatureTime.Day) throw new Exception("对不起,每天只能补签一次。");
+
+                                        string res = UserInfoApi.UserCountersignature(user);
+                                        Bot.SendMessageEx(message, res + " ", false, true);
+                                    }
+                                    break;
+                                case "签到":
+                                    {
+                                        UserInfo user = new UserInfo()
+                                        {
+                                            Id = 0,
+                                            Name = Bot.GetUserName(message.AppId, FromQQ),
+                                            UserQQ = FromQQ,
+                                            RoleType = "玩家",
+                                            IsOnCity = "是",
+                                            User_Attribute = new UserAttribute(),
+                                            User_General = new UserGeneral(),
+                                            User_Items = new UserItems()
+                                        };
+                                        if (UserInfoApi.SignIn(FromQQ, ref user))
+                                        { 
+                                            if (user.IsSendMsgImg == "是")
+                                            {
+                                                UserInfoImg userInfoImg = new UserInfoImg(user);
+                                                string UserInfoImgPath = userInfoImg.GetSignInImg(user);
+                                                 
+                                                Bot.SendMessageEx(message, $"[image,path={UserInfoImgPath}]", false, true);
+                                            }
+                                            else
+                                            {
+                                                Bot.SendMessageEx(message, $"签到成功!\n累计签到：{user.User_General.SignDays}天\n连续签到：{user.User_General.SignDay}天\n当前等级：{user.User_General.Lv} 级\n签到元宝：{user.User_General.CurtYB} 当前元宝 {user.User_General.YB}\n签到经验：{user.User_General.Exp} \n当前经验：{user.User_General.SumExp}/{user.User_General.NextExp}\n您当前已关闭动图消息发送,如需开启请输入 开启发送动图 即可开启.", false, true);
+                                            }
+                                        }
+                                        else
+                                            Bot.SendMessageEx(message, $"签到失败!您今天该是已签过到了吧. ", false, true);
+                                        return;
+                                    }
+                                case "基本功能":
+                                    BaseMenu(message);
+                                    break;
+                                case "仓库服务":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.User_General.VipLv == 0) throw new Exception("对不起,您当前不是会员哦,请前往盟重去领取一个,输入 起步礼包 进行查看吧！");
+                                        string userImgPath = MapApi.RecoverStore(user, 0);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "险恶区域":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+                                        string userImgPath = Market_DefApi.ChuanSongYuanGotXianE(user);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "危险区域":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+
+                                        string userImgPath = Market_DefApi.ChuanSongYuanGotWeiX(user);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "城市传送":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+
+                                        string userImgPath = Market_DefApi.ChuanSongYuanGotoCity(user);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "地图传送":
+                                case "传送员":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+
+                                        string userImgPath = Market_DefApi.ChuanSongYuan(user);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "向商店移动":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和老兵对话吧.");
+
+                                        string userImgPath = Market_DefApi.LaoBinGoToStore(user);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "PK":
+                                case "pk":
+                                    {
+                                        StringBuilder sb = new StringBuilder();
+                                        sb.AppendLine("一：注册：注册一个角色,注册+名字,职业(战士,法师,道士),性别(男or女)");
+                                        sb.AppendLine("例：注册 咕咕鸡,战士,男");
+                                        sb.AppendLine("");
+                                        sb.AppendLine("二：挑战：注册好角色后,发送：PK+AT目标+一句话,即为攻击");
+                                        sb.AppendLine("例：PK@12345可敢一战!");
+                                        sb.AppendLine("注意：属性将根据你说的话计算,如果不想修改属性可以留空");
+                                        Bot.SendMessageEx(message, sb.ToString(), false, true);
+                                    }
+                                    break;
+                                case "卖物品":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和老兵对话吧.");
+
+                                        string userImgPath = MapApi.SellStore(user, msg);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "万事通":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+
+                                        string userImgPath = Market_DefApi.WanShiTong(user);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "下一页":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        //if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+
+                                        string userImgPath = MapApi.JumpPage(user, 1);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "上一页":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        //if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+
+                                        string userImgPath = MapApi.JumpPage(user, -1);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "老兵":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和老兵对话吧.");
+
+                                        string userImgPath = Market_DefApi.LaoBinG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "回城":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        if (user.User_General.Lv <= 7)
+                                            Bot.SendMessageEx(message, $"要打城外的怪必须先杀10只城里的怪物哦,勇士,加油吧!", false, true);
+
+                                        string userImgPath = MapApi.GoBackHome(user);
+                                        if (!string.IsNullOrEmpty(userImgPath))
+                                            Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                        else
+                                            Bot.SendMessageEx(message, $"您已回城到[{user.Map}],发送动图已关闭,如需开启请输入 开启发送动图 即可开启!", false, true);
+                                    }
+                                    break;
+                                case "卖肉":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+
+                                        List<StditemDB> listResult = UserInfoApi.GetSellingMeat(user);
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetSellingMeatIMG(user, listResult);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "查看时装":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetUserFashionIMG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "查看技能":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetUserSkillIMG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "查看属性":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetUserAttributeIMG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "查看状态":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetUserStatusIMG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "查看装备":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetEquipIMG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "查看背包":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetBWGIMG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "查看附近怪物":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0)
+                                        {
+                                            throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        }
+                                        UserInfoImg userInfoImg = new UserInfoImg(user);
+                                        string savePath = userInfoImg.GetNearbyMonsterIMG(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    }
+                                    break;
+                                case "高级口令":
+                                case "高级功能":
+                                    AdvancedMenu(message);
+                                    break;
+                                case "地图口令":
+                                case "地图功能":
+                                    MapMenu(message);
+                                    break;
+                                case "商店口令":
+                                case "商店功能":
+                                    StoreMenu(message);
+                                    break;
+                                case "GM功能":
+                                    GMMenu(message);
+                                    break;
+                                case "改性别":
+                                    {
+                                        UserInfo user = new UserInfo()
+                                        {
+                                            UserQQ = FromQQ,
+                                            Name = msg.Substring(3).Trim()
+                                        };
+                                        if (LegendApi.ChangeSex(user))
+                                        {
+                                            Bot.SendMessageEx(message, $"修改成功!", false, true);
+                                        }
+                                    }
+                                    break;
+                                case "赞我":
+                                    {
+                                        UpVote(message);
+                                    }
+                                    break;
+                                case "神秘地图":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和老兵对话吧.");
+                                        if (user.Map != "盟重土城") throw new Exception("神秘地图在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(3, 8)}.jpg";
+                                        string userImgPath = NPCApi.GetNPCByName(user, "神秘地图");
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "玛雅大厅":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和老兵对话吧.");
+                                        if (user.Map != "盟重土城") throw new Exception("神秘地图在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(3, 11)}.jpg";
+                                        string userImgPath = NPCApi.GetNPCByName(user, "玛雅大厅");
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                case "散人打宝":
+                                    {
+                                        UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                        if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                        if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和老兵对话吧.");
+                                        if (user.Map != "盟重土城") throw new Exception("神秘地图在盟重土城才能查看,请先前往盟重土城.");
+                                        user.UserImagePath = LegendFilePath.LegendIMGDataPath + $"地图\\4\\盟重土城\\4_{rnd.Next(7, 13)}.jpg";
+                                        string userImgPath = NPCApi.GetNPCByName(user, "散人打宝");
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    }
+                                    break;
+                                default: break;
+                            }
+                            if (msg.StartsWith("进行") && msg.Contains("转"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Map != "沙漠荒原") throw new Exception("需要在沙漠荒原才能进行转生,请先前往沙漠荒原(三大陆).");
+                                switch (msg)
+                                {
+                                    case "进行一转": LegendApi.UserRenewLevel(user, 1); break;
+                                    case "进行二转": LegendApi.UserRenewLevel(user, 2); break;
+                                    case "进行三转": LegendApi.UserRenewLevel(user, 3); break;
+                                    case "进行四转": LegendApi.UserRenewLevel(user, 4); break;
+                                    case "进行五转": LegendApi.UserRenewLevel(user, 5); break;
+                                }
+                                Bot.SendMessageEx(message, $"转生成功!", false, true);
+                            }
+
+                            if (msg.StartsWith("@制造") || msg.StartsWith("@11"))
+                            {
+                                if (FromQQ == sGM)
+                                {
+                                    UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                    string nMsg = LegendApi.CreateStditems(user, msg);
+                                    Bot.SendMessageEx(message, nMsg, false, true);
+                                }
+                                else
+                                {
+                                    Bot.SendMessageEx(message, $"你的权限不能使用该指令. ", false, true);
+                                }
+                            }
+                            if (msg.StartsWith("@金币") || msg.StartsWith("@元宝") || msg.StartsWith("@等级") || msg.StartsWith("@声望") || msg.StartsWith("@金刚石"))
+                            {
+                                if (FromQQ == sGM)
+                                {
+                                    string[] arr = msg.Split('#');
+                                    if (arr.Length < 2) throw new Exception("参数错误!");
+                                    string type = arr[0].TrimStart('@');
+                                    int.TryParse(arr[1], out int qty);
+                                    string toqq = FromQQ;
+                                    if (arr.Length == 3) toqq = arr[2].Substring(2).Trim().TrimEnd(']');
+                                    LegendApi.GiveJBYBLevel(type, toqq, qty);
+                                    Bot.SendMessageEx(message, $"操作成功!", false, true);
+                                }
+                                else
+                                {
+                                    Bot.SendMessageEx(message, $"你的权限不能使用该指令. ", false, true);
+                                }
+                            }
+                            if (msg.StartsWith("赠送#"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                var goods = msg.Split('#');
+                                if (goods.Length != 4) throw new Exception("指令错误,请重新再试!");
+                                string goodsName = msg.Split('#')[2];
+                                string giftQQ = msg.Split('#')[1].Substring(2).Trim().TrimEnd(']');
+                                int goodsNum = int.Parse(msg.Split('#')[3]);
+                                if (goodsNum <= 0) throw new Exception("指令错误,请重新再试!");
+                                NPCApi.GiftGoods(user, giftQQ, goodsName, goodsNum);
+                                Bot.SendMessageEx(message, $"物品[{goodsName}]赠送成功!", false, true);
+                            }
+                            if (msg.StartsWith("购买#"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                var goods = msg.Split('#');
+                                if (goods.Length != 3) throw new Exception("指令错误,请重新再试!");
+                                string goodsName = msg.Split('#')[1];
+                                int goodsNum = int.Parse(msg.Split('#')[2]);
+                                if (goodsNum <= 0) throw new Exception("指令错误,请重新再试!");
+                                NPCApi.PurchaseGoods(user, goodsName, goodsNum);
+                                Bot.SendMessageEx(message, $"物品[{goodsName}]购买成功!", false, true);
+                            }
+                            if (msg.StartsWith("查看称号"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                string code = msg.Substring(4);
+                                int.TryParse(code, out int num);
+                                UserInfoImg userInfoImg = new UserInfoImg(user);
+                                string savePath = userInfoImg.GetUserTitleIMG(user, num);
+                                Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                            }
+                            if (msg.StartsWith("勾选") || msg.StartsWith("取消勾选"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                StoreApi.CheckedEquRecycle(user, msg);
+                                string path = StoreApi.GetEquRecycle(user, "装备回收");
+                                Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                            }
+                            if (msg.StartsWith("交易#"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+
+                                string qq = msg.Substring(5);
+                                qq = qq.Substring(0, qq.IndexOf(']'));
+                                int num = int.Parse(msg.Split('#')[2]) - 1;
+                                string refMsg = "";
+                                if (UserInfoApi.UserDeal(user, qq, num, ref refMsg))
+                                    Bot.SendMessageEx(message, refMsg, false, true);
+                            }
+                            if (msg.StartsWith("充值#"))
+                            {
+                                int num = int.Parse(msg.Split('#')[2]);
+                                string userQQ = msg.Split('#')[1];
+                                userQQ = userQQ.Substring(userQQ.IndexOf('@') + 1).Trim().TrimEnd(']');
+
+                                msg = UserInfoApi.UserRecharge(FromQQ, userQQ, num);
+                                Bot.SendMessageEx(message, msg, false, true);
+                            }
+                            if (msg.StartsWith("设置普通自动吃药"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                int.TryParse(msg.Replace("设置普通自动吃药", ""), out int num);
+                                if (num < 0 || num > 100) throw new Exception("自动吃药数值设置错误,请设置1-100之间的数值.");
+                                UserInfoApi.SetAutoMedication(user, "普通吃药", num);
+                                Bot.SendMessageEx(message, $"<@{FromQQ}> 设置成功,您打怪过程血量掉到{num}以下会自动吃药,注意背包药品数量哦!!", false, true);
+                            }
+                            if (msg.StartsWith("设置百分比自动吃药"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+
+                                int.TryParse(msg.Replace("设置百分比自动吃药", ""), out int num);
+                                if (num < 0 || num > 100) throw new Exception("自动吃药数值设置错误,请设置1-100之间的数值.");
+                                UserInfoApi.SetAutoMedication(user, "百分比吃药", num);
+                                Bot.SendMessageEx(message, $"<@{FromQQ}> 设置成功,您打怪过程血量掉到{num}%以下会自动吃药,注意背包药品数量哦!!", false, true);
+                            }
+
+                            if (msg.StartsWith("礼包码"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                string code = msg.Substring(3);
+                                msg = NPCApi.GetGifByCode(user, code);
+                                string path = NPCApi.SendMessageImage(user, msg);
+
+                                string group = GroupQQ;
+                                foreach (string g in group.Split('#'))
+                                {
+                                    if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                    {
+                                        Bot.SendMessageEx(message, msg, false, true);
+                                        Bot.SendMessageEx(message, $"[image,path={path}]", false, true);
+                                    }
+                                }
+
+                            }
+                            if (msg.StartsWith("注册"))
+                            {
+                                string[] arrUser = msg.Substring(2).Replace(",", ",").Split(',');
+                                if (arrUser.Length < 3) throw new Exception("注册格式错误!\n如：注册 枯木大师,战士,男(每个qq号只能注册一次,所有群通用)");
+
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id > 0)
+                                {
+                                    throw new Exception("对不起,您已经注册过游戏了!请勿重复注册.");
+                                }
+                                user.Name = arrUser[0].Trim();
+                                user.Job = arrUser[1].Trim();
+                                user.Sex = arrUser[2].Trim();
+                                if (LegendApi.Register(user))
+                                {
+                                    UserInfoImg userInfoImg = new UserInfoImg(user);
+                                    string userImgPath = userInfoImg.GetRegisterImg(user);
+                                    Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                }
+                            }
+
+                            if (msg.StartsWith("带装备"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                int.TryParse(msg.Substring(3).Trim(), out int pos);
+                                if (pos <= 0)
+                                {
+                                    throw new Exception("口令错误或未获取到物品,请重试.");
+                                }
+                                if (UserInfoApi.SetUseEquipment(user, pos))
+                                {
+                                    Bot.SendMessageEx(message, $"穿戴成功!输入 查看装备 或 查看属性 查看吧!", false, true);
+                                }
+                            }
+                            if (msg.StartsWith("取下"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+                                msg = msg.Substring(2).Trim();
+                                // 取装备
+                                if (UserInfoApi.TaskEquipment(user, msg))
+                                {
+                                    Bot.SendMessageEx(message, $"装备已取下!输入 查看装备 或 查看属性 查看吧!", false, true);
+                                }
+                            }
+                            if (msg.StartsWith("查看背包") && msg.Length >= 5)
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+
+                                int.TryParse(msg.Substring(4).Trim(), out int num);
+                                if (num > 0)
+                                {
+                                    UserInfoImg userInfoImg = new UserInfoImg(user);
+                                    string savePath = userInfoImg.GetBWGIMG(user, num);
+                                    Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                }
+                            }
+
+                            if (msg.StartsWith("使用技能") && msg.Length >= 5)
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+
+                                int.TryParse(msg.Substring(4).Trim(), out int num);
+                                if (num <= 0)
+                                {
+                                    throw new Exception("口令错误或未获取到技能编号,请重试.");
+                                }
+                                num -= 1;
+                                UserInfoApi.UseSkill(user, num);
+                                UserInfoImg userInfoImg = new UserInfoImg(user);
+                                string userImgPath = userInfoImg.GetUserSkillIMG(user);
+                                Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            }
+                            //if (Msg.StartsWith("#改名"))
+                            //{
+                            //    UserInfo user = new UserInfo()
+                            //    {
+                            //        UserQQ = FromQQ,
+                            //        UserName = Msg.Substring(3).Trim()
+                            //    };
+
+                            //    if (LegendApi.ChangeUserName(user))
+                            //    {
+                            //        string UserInfoImgPath = UserInfoImg.GetRegisterImg(user);
+                            //        Bot.SendMessageEx(message, $"修改成功!", false, true);
+                            //    }
+                            //}
+
+                            //if (Msg.StartsWith("#改职业"))
+                            //{
+                            //    UserInfo user = new UserInfo()
+                            //    {
+                            //        UserQQ = FromQQ,
+                            //        UserName = Msg.Substring(4).Trim()
+                            //    };
+
+                            //    if (LegendApi.ChangeUserJob(user))
+                            //    {
+                            //        //string UserInfoImgPath = UserInfoImg.GetRegisterImg(user);
+                            //        Bot.SendMessageEx(message, $"修改成功!", false, true);
+                            //    }
+                            //}
+
+                            if (msg.StartsWith("打怪"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                int killCount = 10;
+                                string mon = msg.Split('#')[0].Replace("打怪", "");
+                                if (msg.IndexOf('#') > 0)
+                                {
+                                    int.TryParse(msg.Split('#')[1], out killCount);
+                                    if (killCount > 10) killCount = 10;
+                                }
+                                else
+                                {
+                                    if (mon == "专属BOSS") killCount = rnd.Next(1, user.User_VIPAttribute.AutoBoos + 1);
+                                }
+
+
+                                if (mon == "专属BOSS" && killCount > user.User_VIPAttribute.AutoBoos)
+                                {
+                                    throw new Exception($"您当前的会员等级每天最多只能打{user.User_VIPAttribute.AutoBoos}只专属BOSS.");
+                                }
+                                if (mon == "专属BOSS" && user.User_VIPAttribute.AutoBoos <= user.User_VIPAttribute.AutoPBoos)
+                                {
+                                    throw new Exception($"对不起,您当天的专属BOSS已打完,想打更多请提升会员等级吧.");
+                                }
+
+                                int reCount = int.Parse(config.Read("配置信息", "战斗记录回合数"));
+                                var monBossList = MonBoss.GetMonBossByTXT();
+
+                                user = MonsterApi.GetPlayerAttackMonster(user, mon, killCount, reCount, monBossList);
+                                UserInfoApi.RefreshOverlayStdItems(user);//叠加物品-整理背包
+
+                                var firstKillMonList = FirstKillMon.GetFirstKillMons();
+                                string supNotifyMsg = "", supNotifyMsg2 = "";
+
+                                var dropStdList = StdItemDropTip.GetStdItems();
+                                List<string> dropStdMsgList = new List<string>();
+
+                                switch (user.Job)
+                                {
+                                    case "战士":
+                                        if (user.User_General.Lv == 7 && user.IsSendMsgByLv7 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经7级了,已自动学习技能[基本剑术],快去城外闯闯吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 19 && user.IsSendMsgByLv19 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经19级了,已自动学习技能[攻杀剑术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 25 && user.IsSendMsgByLv25 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经25级了,已自动学习技能[刺杀剑术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 28 && user.IsSendMsgByLv28 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经28级了,已自动学习技能[半月弯刀],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 30 && user.IsSendMsgByLv30 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经30级了,已自动学习技能[野蛮冲撞],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 35 && user.IsSendMsgByLv35 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经35级了,已自动学习技能[烈火剑法],快去打怪试试吧!", false, true);
+                                        }
+                                        break;
+                                    case "法师":
+                                        if (user.User_General.Lv == 7 && user.IsSendMsgByLv7 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经7级了,已自动学习技能[火球术],快去城外闯闯吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 12 && user.IsSendMsgByLv12 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经12级了,已自动学习技能[抗拒火环],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 13 && user.IsSendMsgByLv13 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经13级了,已自动学习技能[诱惑之光],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 16 && user.IsSendMsgByLv16 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经16级了,已自动学习技能[地狱火],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 17 && user.IsSendMsgByLv17 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经17级了,已自动学习技能[雷电术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 19 && user.IsSendMsgByLv19 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经19级了,已自动学习技能[大火球],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 20 && user.IsSendMsgByLv20 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经20级了,已自动学习技能[瞬息移动],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 22 && user.IsSendMsgByLv22 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经22级了,已自动学习技能[爆裂火焰],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 24 && user.IsSendMsgByLv24 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经24级了,已自动学习技能[火墙],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 26 && user.IsSendMsgByLv26 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经26级了,已自动学习技能[疾光电影],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 30 && user.IsSendMsgByLv30 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经30级了,已自动学习技能[地狱雷光],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 31 && user.IsSendMsgByLv31 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经31级了,已自动学习技能[魔法盾],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 32 && user.IsSendMsgByLv32 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经32级了,已自动学习技能[圣言术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 35 && user.IsSendMsgByLv35 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经35级了,已自动学习技能[冰咆哮],快去打怪试试吧!", false, true);
+                                        }
+                                        break;
+                                    case "道士":
+                                        if (user.User_General.Lv == 7 && user.IsSendMsgByLv7 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经7级了,已自动学习技能[治愈术],快去城外闯闯吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 9 && user.IsSendMsgByLv9 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经9级了,已自动学习技能[精神力战法],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 14 && user.IsSendMsgByLv14 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经14级了,已自动学习技能[施毒术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 18 && user.IsSendMsgByLv18 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经18级了,已自动学习技能[灵魂火符],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 19 && user.IsSendMsgByLv19 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经19级了,已自动学习技能[召唤骷髅],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 20 && user.IsSendMsgByLv20 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经20级了,已自动学习技能[隐身术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 21 && user.IsSendMsgByLv21 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经21级了,已自动学习技能[集体隐身术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 22 && user.IsSendMsgByLv22 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经22级了,已自动学习技能[幽灵盾],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 25 && user.IsSendMsgByLv25 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经25级了,已自动学习技能[神圣战甲术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 26 && user.IsSendMsgByLv26 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经26级了,已自动学习技能[心灵启示],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 28 && user.IsSendMsgByLv28 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经28级了,已自动学习技能[困魔咒],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 33 && user.IsSendMsgByLv33 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经33级了,已自动学习技能[群体治疗术],快去打怪试试吧!", false, true);
+                                        }
+                                        else if (user.User_General.Lv == 35 && user.IsSendMsgByLv35 == "否")
+                                        {
+                                            Bot.SendMessageEx(message, $"你已经35级了,已自动学习技能[召唤神兽],快去打怪试试吧!", false, true);
+                                        }
+                                        break;
+                                }
+                                StringBuilder sb = new StringBuilder();
+                                sb.AppendLine($"信息：<@{user.UserQQ}>");
+
+                                Dictionary<string, int> itemDic = new Dictionary<string, int>();
+                                foreach (var monster in user.KillMons)
+                                {
+                                    if (monster.MonItemList != null)
+                                    {
+                                        sb.Append($"怪物：{monster.MonName}  ");
+                                        int exp = monster.Exp + (int)(monster.Exp * (user.User_VIPAttribute.MonExpInc / 100.0));
+                                        sb.Append($"经验：{exp} ");
+
+                                        if (monster.MonItemList.Count > 0)
+                                        {
+                                            var iList = monster.MonItemList.GroupBy(s => s).Select(s => new { ItemName = s.Key.StdName, Count = s.Count() }).ToList();
+                                            foreach (var item in iList)
+                                            {
+                                                if (!itemDic.ContainsKey(item.ItemName)) itemDic.Add(item.ItemName, item.Count);
+                                                else itemDic[item.ItemName] += item.Count;
+                                            }
+                                        }
+
+                                        // 取第一个击杀boss的信息
+                                        if (string.IsNullOrEmpty(supNotifyMsg) && mon != "专属BOSS")
+                                            supNotifyMsg = FirstKillMon.FirstKillMons(user, firstKillMonList, monster.MonName, user.Map);
+
+                                        sb.AppendLine();
+                                    }
+                                    else
+                                    {
+                                        sb.AppendLine("哦豁,你被怪物[" + monster.MonName + "]杀害了.");
+                                        sb.AppendLine("你已回到城中,HP已恢复,MP已恢复.");
+                                    }
+                                }
+                                sb.AppendLine($"等级：{user.User_General.Lv}");
+                                sb.AppendLine($"经验：{user.User_General.SumExp}/{user.User_General.NextExp}");
+                                sb.AppendLine($"升级还需{user.User_General.NextExp - user.User_General.SumExp}经验");
+                                sb.Append($"掉落装备：");
+                                foreach (var item in itemDic)
+                                {
+                                    supNotifyMsg2 = StdItemDropTip.SetStdItems(user, dropStdList, item.Key, user.Map);
+                                    if (!string.IsNullOrEmpty(supNotifyMsg2))
+                                        dropStdMsgList.Add(supNotifyMsg2);
+
+                                    sb.Append($"{item.Key}+{item.Value},");
+                                }
+                                sb.Remove(sb.Length - 1, 1);
+                                sb.AppendLine();
+                                if (user.User_EquRecycleAttr.AutoRecycl == "是")
+                                {
+                                    sb.AppendLine($"已设置自动回收,回收的物品无法撤销,请确保没有回收重要物品,发送 装备回收 查看勾选状态。");
+                                }
+                                //sb.AppendLine("活跃值：" + user.User_General.ActivityQty);
+                                if (user.PageQty <= 0)
+                                {
+                                    sb.AppendLine("背包格子已满,地上的装备捡不起来,请先回城里卖点东西 或者 回收一点装备吧.");
+                                }
+                                Bot.SendMessageEx(message, sb.ToString(), false, true);
+
+                                if (!string.IsNullOrEmpty(supNotifyMsg))
+                                {
+                                    string group = GroupQQ;
+                                    foreach (string g in group.Split('#'))
+                                    {
+                                        if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                        {
+                                            Bot.SendMessageEx(message, supNotifyMsg, false, true);
+                                        }
+                                    }
+                                }
+                                foreach (var item in dropStdMsgList)
+                                {
+                                    string group = GroupQQ;
+                                    foreach (string g in group.Split('#'))
+                                    {
+                                        if (!string.IsNullOrEmpty(g) && !groups.Contains(g))
+                                        {
+                                            Bot.SendMessageEx(message, item, false, true);
+                                        }
+                                    }
+                                }
+
+                                UserInfoImg userInfoImg = new UserInfoImg(user);
+                                if (user.IsSendMsgImg == "是")
+                                {
+                                    Task.Run(async () =>
+                                    {
+                                        string savePath = await userInfoImg.GetAttackMonster(user);
+                                        Bot.SendMessageEx(message, $"[image,path={savePath}]", false, true);
+                                    });
+
+                                    if (user.IsOnCity == "是")
+                                    {
+                                        sb.Clear();
+                                        sb.AppendLine($"再打 {10 - user.KillCityMonNum} 只怪就会自动出城打怪了,勇士,加油吧!");
+                                        Bot.SendMessageEx(message, sb.ToString(), false, true);
+                                    }
+                                }
+                                return;
+                            }
+                            if (msg.StartsWith("补偿活跃值"))
+                            {
+                                string nMsg = msg.Substring(7);
+                                if (nMsg.Length < 4) throw new Exception("对不起,用户未找到,请重新输入.");
+                                string qq = nMsg.Substring(0, nMsg.IndexOf(']'));
+                                int num = int.Parse(nMsg.Split('#')[1]);
+                                if (UserInfoApi.SetAllUserQty(FromQQ, qq, num))
+                                {
+                                    Bot.SendMessageEx(message, $"用户<@{qq}>成功补偿{num}点活跃值!", false, true);
+                                }
+                            }
+                            if (msg.StartsWith("所有人补偿活跃值"))
+                            {
+                                var msgList = msg.Split('#');
+                                if (msgList.Length != 2) throw new Exception("对不起,格式错误,请重新输入.");
+                                int num = int.Parse(msg.Split('#')[1]);
+                                if (UserInfoApi.SetAllUserQty(FromQQ, num))
+                                {
+                                    Bot.SendMessageEx(message, $"所有用户成功补偿{num}点活跃值!", false, true);
+                                }
+                            }
+                            if (msg.ToLower().StartsWith("pk"))
+                            {
+                                if (msg.Length > 3)
+                                {
+                                    string nMsg = msg.Substring(4);
+                                    if (nMsg.Length < 4) throw new Exception("对不起,您的对手未找到,请重新pk挑战其它对手吧.");
+                                    string qq2 = nMsg.Substring(0, nMsg.IndexOf(']'));
+
+                                    UserInfo user1 = UserInfoApi.GetInfoByQQ(FromQQ);
+                                    if (user1.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+
+
+                                    string userImgPath = LegendFilePath.UserPath + qq2 + ".ini";
+                                    UserInfo user2 = null;
+                                    if (!File.Exists(userImgPath))
+                                    {
+                                        string eName = Bot.GetUserName(message.AppId, qq2);
+                                        user2 = UserInfoApi.GetVirtualInfoByQQ(qq2, eName, user1.User_General.Lv + 1, user1.User_Attribute.Ac + 1, user1.User_Attribute.Ac2 + 1, user1.User_Attribute.Agile + 1);
+
+                                    }
+                                    else
+                                    {
+                                        user2 = UserInfoApi.GetInfoByQQ(qq2);
+                                    }
+
+                                    msg = nMsg.Substring(nMsg.IndexOf(']') + 1).Trim();
+                                    List<UserAttackRecord> userAttackRecords = UserInfoApi.GetUserPKData(user1, user2, msg);
+
+                                    user1.UserImagePath = $"{LegendFilePath.LegendIMGDataPath}地图\\pk房{rnd.Next(1, 7)}.jpg";
+                                    user1.Map = "PK挑战房";
+                                    UserInfoImg2 userInfoImg = new UserInfoImg2(user1);
+
+                                    Task.Run(async () =>
+                                    {
+                                        userImgPath = await userInfoImg.GetUserPK(userAttackRecords, user1, user2);
+
+                                        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                    });
+
+                                    return;
+                                }
+                            }
+                            if (msg.StartsWith("下图"))
+                            {
+                                string gt = msg.Substring(2).Trim();
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+
+                                string userImgPath = MapApi.GotoMap(user, gt);
+                                if (!string.IsNullOrEmpty(userImgPath))
+                                    Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                else
+                                    Bot.SendMessageEx(message, $"您已下图到[{user.Map}],发送动图已关闭,如需开启请输入 开启发送动图 即可开启!", false, true);
+
+                            }
+                            if (msg.StartsWith("前往"))
+                            {
+                                string gt = msg.Substring(2).Trim();
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+                                if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+
+                                int userJb = 0;
+                                string userImgPath = "";
+                                switch (gt)
+                                {
+                                    case "银杏小村":
+                                    case "银杏山谷":
+                                    case "边界小城":
+                                    case "边界村":
+                                    case "毒蛇山谷":
+                                    case "比奇城":
+                                    case "盟重":
+                                    case "盟重土城":
+
+                                    case "天宫仙境":
+                                    case "二大陆":
+
+                                    case "沙漠荒原":
+                                    case "三大陆":
+
+                                    case "大帝之城":
+                                    case "四大陆":
+                                        userJb = 2000; userImgPath = MapApi.GotoCityMap(user, gt, userJb); break;
+                                    default: userJb = 5000; userImgPath = MapApi.GotoNormalXianEMap(user, gt, userJb); break;
+                                }
+
+                                if (!string.IsNullOrEmpty(userImgPath))
+                                    Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                else
+                                    Bot.SendMessageEx(message, $"您已到[{user.Map}],发送动图已关闭,如需开启请输入 开启发送动图 即可开启!", false, true);
+                            }
+                            //if (msg.StartsWith("#前往"))
+                            //{
+                            //    string gt = msg.Substring(3).Trim();
+                            //    UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                            //    // 如果用户只签到没有注册就进行注册,否则提示已注册
+                            //    if (user.Id == 0)
+                            //    {
+                            //        throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                            //    }
+                            //    if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+
+                            //    string userImgPath = MapApi.GoToStrStore(user, gt);
+                            //    Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            //}
+                            if (msg.StartsWith("买物品"))
+                            {
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                // 如果用户只签到没有注册就进行注册,否则提示已注册
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+                                if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+
+                                string userImgPath = MapApi.BuyStore(user, msg);
+                                Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            }
+                            //if (msg.StartsWith("卖"))
+                            //{
+                            //    string gt = msg.Substring(1).Trim();
+
+                            //    UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                            //    // 如果用户只签到没有注册就进行注册,否则提示已注册
+                            //    if (user.Id == 0)
+                            //    {
+                            //        throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                            //    }
+                            //    if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和传送员对话吧.");
+
+                            //    string userImgPath = MapApi.SellStore(user, gt);
+                            //    if (!string.IsNullOrEmpty(userImgPath))
+                            //        Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            //}
+                            if (msg.StartsWith("查看首杀"))
+                            {
+                                int.TryParse(msg.Substring(4).Trim(), out int num);
+                                if (num < 0)
+                                {
+                                    throw new Exception("口令错误或未获取到查询编号,请重试.");
+                                }
+
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+
+                                num = num == 0 ? 1 : num;
+                                string userImgPath = PrizeApi.GetFristKillImg(user, num);
+                                Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            }
+                            if (msg.StartsWith("查看首爆"))
+                            {
+                                int.TryParse(msg.Substring(4).Trim(), out int num);
+                                if (num < 0)
+                                {
+                                    throw new Exception("口令错误或未获取到查询编号,请重试.");
+                                }
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+                                num = num == 0 ? 1 : num;
+                                string userImgPath = PrizeApi.GetFristPrizeImg(user, num);
+                                Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            }
+
+                            if (msg.StartsWith("保管"))
+                            {
+                                msg = msg.Substring(2).Trim();
+                                int stnum = 0, ednum = 0;
+                                if (msg.IndexOf('#') >= 0)
+                                {
+                                    var arrM = msg.Split('#');
+                                    int.TryParse(arrM[0], out stnum);
+                                    int.TryParse(arrM[1], out ednum);
+                                }
+                                else
+                                {
+                                    int.TryParse(msg, out stnum);
+                                    ednum = stnum;
+                                }
+                                if (stnum < 0) throw new Exception("口令错误或未获取到保管物品编号,请重试.");
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+                                if (user.User_General.VipLv == 0) if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+
+                                stnum = stnum <= 0 ? 1 : stnum;
+                                string userImgPath = MapApi.SafeStore(user, stnum, ednum);
+                                if (user.IsSendMsgImg == "是")
+                                {
+                                    Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                                }
+                                else
+                                {
+                                    Bot.SendMessageEx(message, $"物品[{userImgPath}] 保存成功！", false, true);
+                                }
+                            }
+                            if (msg.StartsWith("找回"))
+                            {
+                                int.TryParse(msg.Substring(2).Trim(), out int num);
+                                if (num < 0)
+                                {
+                                    throw new Exception("口令错误或未获取到找回物品编号,请重试.");
+                                }
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0)
+                                {
+                                    throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                }
+                                if (user.User_General.VipLv == 0) if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+
+                                string userImgPath = MapApi.RecoverStore(user, num);
+                                Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            }
+                            if (msg.StartsWith("取回"))
+                            {
+                                msg = msg.Substring(2).Trim();
+                                int stnum = 0, ednum = 0;
+                                if (msg.IndexOf('#') >= 0)
+                                {
+                                    var arrM = msg.Split('#');
+                                    int.TryParse(arrM[0], out stnum);
+                                    int.TryParse(arrM[1], out ednum);
+                                }
+                                else
+                                {
+                                    int.TryParse(msg, out stnum);
+                                    ednum = stnum;
+                                }
+                                if (stnum < 0) throw new Exception("口令错误或未获取到保管物品编号,请重试.");
+                                if (ednum > 80) throw new Exception("取出数量大于仓库最大数量,请重试.");
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                if (user.User_General.VipLv == 0) if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+                                stnum = stnum <= 0 ? 1 : stnum;
+                                msg = MapApi.GetStdItemByStore(user, stnum, ednum);
+                                Bot.SendMessageEx(message, msg, false, true);
+                            }
+                            if (msg.StartsWith("金币换金条"))
+                            {
+                                int num = 1;
+                                if (msg.IndexOf('#') > 0)
+                                {
+                                    num = int.Parse(msg.Split('#')[1]);
+                                }
+
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                if (user.User_General.VipLv == 0) if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+
+                                string userImgPath = MapApi.GetTigToGold(user, num);
+                                Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            }
+
+                            if (msg.StartsWith("金条换金币"))
+                            {
+                                int num = 1;
+                                if (msg.IndexOf('#') > 0)
+                                {
+                                    num = int.Parse(msg.Split('#')[1]);
+                                }
+
+                                UserInfo user = UserInfoApi.GetInfoByQQ(FromQQ);
+                                if (user.Id == 0) throw new Exception("对不起,您没有注册哦!请在输入框中输入 注册 名称,职业,性别 即可.");
+                                if (user.User_General.VipLv == 0) if (user.IsOnCity == "否") throw new Exception("你不在城中,请输入 回城 再和万事通对话吧.");
+
+                                string userImgPath = MapApi.GetGoldToTig(user, num);
+                                Bot.SendMessageEx(message, $"[image,path={userImgPath}]", false, true);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Bot.SendMessageEx(message, "<@" + FromQQ + "> " + ex.Message + " ", false, true);
+                        }
+                        break;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Bot.SendMessageEx(message, ex.Message + " ", false, true);
+            }
+
+
+            return;
+        }
+
+        /// <summary>
+        /// 点赞指令降级：纯白铃 SDK 的 26 个 api 未提供「点赞」，官方 QQ 机器人平台也没有该能力。
+        /// 保留指令入口并明确告知用户，不编造不存在的接口。
+        /// </summary>
+        private static void UpVote(MessageInfo message)
+        {
+            Bot.SendMessageEx(message, "点赞功能在当前框架下不可用（平台未提供点赞能力）。", false, true);
+        }
+
+        private static void GMMenu(MessageInfo message)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("\\uD83C\\uDF88 清除注册信息\t超级管理员才可以清除用户(其它数据保留)");
+            sb.AppendLine("\\uD83C\\uDF88 制造\t默认制造物品在自己背包中,其它口令如 制造 裁决之杖 1,制造 1把裁决之杖");
+            sb.AppendLine("\\uD83C\\uDF88 调金币\t默认给自己调金币,其它口令如 @金币#张三#100000,给张三10万金币");
+            sb.AppendLine("\\uD83C\\uDF88 调元宝\t默认给自己调金币,其它口令如 @元宝#张三#100000,给张三10万元宝");
+            sb.AppendLine("\\uD83C\\uDF88 调等级\t默认调自己等级,其它口令如 @等级#@张三#50,将张三调到50级");
+            sb.AppendLine("\\uD83C\\uDF88 调声望\t默认调自己等级,其它口令如 @声望#@张三#50,给张三调50声望");
+            sb.AppendLine("\\uD83C\\uDF88 调金刚石\t默认调自己等级,其它口令如 @金刚石#@张三#50,给张三调50金刚石");
+            sb.AppendLine("\\uD83C\\uDF88 设置VIP\t给某人设置VIP,口令：设置VIP@张三,给张三设置VIP,2倍经验/活力,背包神器1,回收,挂机");
+            sb.AppendLine("\\uD83C\\uDF88 设置SVIP\t给某人设置SVIP,口令：设置SVIP@张三,给张三设置SVIP,4倍经验/活力,背包神器2,2倍回收,挂机");
+            sb.AppendLine("\\uD83C\\uDF88 升级SVIP\t给某人SVIP等级升级,口令：升级SVIP@张三,给张三设置SVIP等级+1,等级越高其它属性越高,福利越多");
+            sb.AppendLine("");
+            Bot.SendMessageEx(message, sb.ToString(), false, true);
+        }
+
+        private static void StoreMenu(MessageInfo message)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("\\uD83C\\uDF88 打命令时必须要在城中,如果在野外打怪,或者在其它地图中是不能使用的.");
+            sb.AppendLine("\\uD83C\\uDF88 买物品时在查看的店铺中买物品,回收的装备不会在店铺中,只有卖了物品到店铺中才有");
+            sb.AppendLine("");
+            sb.AppendLine("\\uD83C\\uDF88 #前往武器店\t可以买卖武器,如：买装备乌木剑,卖武器");
+            sb.AppendLine("\\uD83C\\uDF88 #前往服装店\t可以买卖衣服和头盔,如：买装备布衣(男),卖衣服(头盔和衣服都会自动卖掉)");
+            sb.AppendLine("\\uD83C\\uDF88 #前往项链店\t可以买卖项链,如：买装备金项链,卖项链");
+            sb.AppendLine("\\uD83C\\uDF88 #前往手镯店\t可以买卖手镯,如：买装备大手镯,卖手镯");
+            sb.AppendLine("\\uD83C\\uDF88 #前往戒指店\t可以买卖戒指,如：买装备牛角戒指,卖戒指");
+            sb.AppendLine("\\uD83C\\uDF88 #前往书店\t可以买卖书,如：买书火球术,卖书,只有比奇,盟重,白日门,封魔谷有书店");
+            sb.AppendLine("\\uD83C\\uDF88 #前往杂货店\t可以买卖杂货材料,如：买材料回城卷,卖材料");
+            sb.AppendLine("\\uD83C\\uDF88 #前往药品店\t可以买卖药品,如：买药万年雪霜,卖药品");
+            sb.AppendLine("\\uD83C\\uDF88 #前往炼药店\t可以卖药品材料,炼药,如：炼药红毒/绿毒,卖材料");
+            sb.AppendLine("\\uD83C\\uDF88 肉店\t直接打 卖肉 就可以了");
+
+            Bot.SendMessageEx(message, sb.ToString(), false, true);
+        }
+
+        private static void MapMenu(MessageInfo message)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("\\uD83C\\uDF88 安全地图\t查看安全的城市");
+            sb.AppendLine("\\uD83C\\uDF88 中级地图\t查看中级升级打宝的地图");
+            sb.AppendLine("\\uD83C\\uDF88 高级地图\t查看高级升级打宝的地图");
+            sb.AppendLine("\\uD83C\\uDF88 终极地图\t查看终级升级打宝的地图,需带NPC名称,如：终极地图 复古深渊");
+            sb.AppendLine("\\uD83C\\uDF88 前往\t可以前往对应的地图,如：前往 白日门,前往兽人古墓");
+            sb.AppendLine("\\uD83C\\uDF88 #前往\t可以前往对应的商店,如：#前往 书店,#前往 武器店");
+            sb.AppendLine("\\uD83C\\uDF88 下图\t可以当前地图的下一个地图,如：下图兽人古墓2,必须在1才能下2,在2才能下3,3可以回到2口令也是一样的");
+            sb.AppendLine("");
+            Bot.SendMessageEx(message, sb.ToString(), false, true);
+        }
+
+        private static void AdvancedMenu(MessageInfo message)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("\\uD83C\\uDF88 回收\t打开回收面板,回收装备,[emoji=E29AA1]回收的装备不会在店铺中,只有卖了物品到店铺中才有");
+            sb.AppendLine("\\uD83C\\uDF88 仓库\t打开仓库面板,存取装备必须回城中操作,VIP可随身仓库存取");
+            sb.AppendLine("\\uD83C\\uDF88 PK\t@某人可进行PK,属性将根据你说的话计算,如果不想修改属性可以留空,如: PK@12345可敢一战! 只能PK本群中人");
+            sb.AppendLine("\\uD83C\\uDF88 打排位\t随机取所有群中人进行PK,赢了升排名");
+            sb.AppendLine("\\uD83C\\uDF88 学技能\t只能学习背包里的技能,只能学习本职业技能,并且等级要达到");
+            sb.AppendLine("\\uD83C\\uDF88 改名\t对自己名称不满意可以修改名称,口令：改名 枯木大师,每次扣500元宝");
+            sb.AppendLine("\\uD83C\\uDF88 改职业\t对自己职业不满意可以修改职业,等级不变所有技能清空重新学");
+            sb.AppendLine("\\uD83C\\uDF88 改性别\t对自己性别不满意可以修改性别");
+            sb.AppendLine("");
+            Bot.SendMessageEx(message, sb.ToString(), false, true);
+        }
+
+        private static void BaseMenu(MessageInfo message)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("\\uD83C\\uDF88 注册\t注册一个用户,如:注册 枯木大师,战士,男\t只有注册才能开始游戏");
+            sb.AppendLine("\\uD83C\\uDF88 签到\t每天签到得奖励(金币,经验,元宝)");
+            sb.AppendLine("\\uD83C\\uDF88 查看背包\t查看背包内物品,口令 查看1 查看第1个物品属性 依次类推");
+            sb.AppendLine("\\uD83C\\uDF88 查看装备\t查看自己的装备,口令 查看装备左戒 右戒 左手 右手 项链 头盔 衣服 武器 勋章");
+            sb.AppendLine("\\uD83C\\uDF88 查看状态\t查看自己的状态");
+            sb.AppendLine("\\uD83C\\uDF88 查看属性\t查看自己的属性");
+            sb.AppendLine("\\uD83C\\uDF88 查看技能\t查看自己的技能");
+            sb.AppendLine("\\uD83C\\uDF88 查看时装\t查看自己的时装");
+            sb.AppendLine("\\uD83C\\uDF88 查看附近怪物\t查看当前的位置和身边有什么怪物");
+            sb.AppendLine("\\uD83C\\uDF88 带装备\t带背包里的装备,如：带装备1 带背包位置1的装备,戒指手镯默认先带左边后带右边");
+            sb.AppendLine("\\uD83C\\uDF88 取下装备\t取身上的装备到背包中,如：取下左戒指,取下右手镯,取下武器,单独打取下手镯或戒指则两个都取下");
+            sb.AppendLine("\\uD83C\\uDF88 打怪\t默认随机打身边怪物,指定打怪口令 打怪 鹿");
+            sb.AppendLine("\\uD83C\\uDF88 回城\t自动回到主城,很多事情只有回城才能做,当然VIP某些功能可以不需要回城");
+            sb.AppendLine("\\uD83C\\uDF88 卖肉\t前期没有钱可以戳肉卖钱,能戳鹿,鸡,羊,肉直接到背包里");
+            sb.AppendLine("\\uD83C\\uDF88 买物品\t要在对应的店子内才能买,口令 #买 + 物品");
+            sb.AppendLine("\\uD83C\\uDF88 卖物品\t要在对应的店子内才能买,口令 #买 + 物品");
+            sb.AppendLine("\\uD83C\\uDF88 开启发送动图\t开启后可以接收到签到,打怪的动图效果");
+            sb.AppendLine("\\uD83C\\uDF88 关闭发送动图\t关闭后无法接收到签到,打怪的动图效果");
+            sb.AppendLine("");
+            Bot.SendMessageEx(message, sb.ToString(), false, true);
+        }
+        #endregion
+
+        static void LegendMenu(MessageInfo message)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("《咕咕鸡传奇》该游戏具有战士、魔法师和道士三种职业,所有情节的发生、经验值取得以及各种打猎、采矿等活动都是在网络上即时发生.《咕咕鸡传奇》包括白天、黑夜、贸易、物品等观念,玩家可以通过采矿、打猎等来获得货币,利用货币进行贸易.整个游戏充满了魔力,具有东方色彩.");
+            sb.AppendLine("");
+            sb.AppendLine("功能口令如下：");
+            sb.AppendLine("\\uD83D\\uDC9D 基本功能：注册,签到,查看（背包,装备,状态,属性,技能,位置）,附近怪物,打怪,回城,戳肉");
+            sb.AppendLine("\\uD83D\\uDC9D 高级功能：回收,仓库,PK,打排位,带装备(带装备名称),取装备(取装备名称),学技能,改名,改职业,改性别");
+            sb.AppendLine("\\uD83D\\uDC9D 商店功能：店铺(仓库,服装店,首饰店,书店,头盔店,武器店,杂货铺,肉店,商人),卖买物品");
+            sb.AppendLine("\\uD83D\\uDC9D 地图功能：安全地图,中级地图,高级地图,终极地图,前往(带区域名+地图名),下地图(地图名)");
+            sb.AppendLine("\\uD83D\\uDC9D GM功能：调等级,调装备,调金币,调元宝,设置VIP");
+            sb.AppendLine("");
+            sb.AppendLine("具体查看 咕咕鸡传奇指令说明文档：http://47.115.223.113");
+            sb.AppendLine("");
+            sb.AppendLine("\\uD83C\\uDF88 皇城PK,怒刷BOSS!");
+            sb.AppendLine("\\uD83C\\uDF88 刀刀999,绝对刺激!");
+            sb.AppendLine("\\uD83C\\uDF88 散人高爆,元宝秒回收!");
+            sb.AppendLine("\\uD83C\\uDF88 是兄弟就来砍我!");
+            sb.AppendLine("");
+            Bot.SendMessageEx(message, sb.ToString(), false, true);
+        }
+    }
+
+
+}

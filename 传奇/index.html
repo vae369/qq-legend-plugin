@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>咕咕鸡传奇说明文档</title>
+    <link rel="preload stylesheet" href="images/style.Cs6MiQ19.css" as="style">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #fafbfc;
+        }
+
+        .container {
+            display: flex;
+            margin: 20px 0 0 0;
+            justify-content: center;
+        }
+
+        .sidebar {
+            width: 300px;
+            border: 1px solid #f00;
+            padding: 20px 10px 20px 20px;
+            background: #fff;
+            margin-right: 20px;
+            margin-left: 10px;
+            height: 800px;
+            overflow-y: auto;
+        }
+
+            .sidebar ul, .sidebar li {
+                list-style: none;
+                padding-left: 0;
+                margin: 0;
+            }
+
+            .sidebar li {
+                margin: 4px 0;
+            }
+
+            .sidebar a {
+                color: #1a0dab;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+                .sidebar a:hover {
+                    text-decoration: underline;
+                }
+
+        .content {
+            flex: 1;
+            min-width: 400px;
+            min-height: 800px;
+            border: 1px solid #f00;
+            background: #fff;
+            padding: 30px;
+            color: #333;
+            margin-right: 20px;
+            height: 800px;
+            overflow-y: auto;
+        }
+
+        .tree ul {
+            margin-left: 20px;
+        }
+
+        .tree > ul {
+            margin-left: 10px;
+        }
+
+        .desc {
+            background-color: lavenderblush;
+        }
+
+        .desc2 {
+            background-color: lime;
+            font-size: 20px;
+        }
+
+        .titleDesc {
+            line-height: 24px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar tree">
+            <div><b>咕咕鸡传奇说明文档</b></div>
+            <ul>
+                <li><a onclick="showContent('指令说明')">指令说明</a></li>
+                <li>
+                    <a onclick="showContent('普通命令')">普通命令</a>
+                    <ul>
+                        <li><a onclick="showContent('签到')">签到</a></li>
+                        <li><a onclick="showContent('注册')">注册</a></li>
+                        <li><a onclick="showContent('打怪')">打怪</a></li>
+                        <li><a onclick="showContent('带装备')">带装备</a></li>
+                        <li><a onclick="showContent('取装备')">取装备</a></li>
+                        <li><a onclick="showContent('PK')">PK</a></li>
+                        <li><a onclick="showContent('打排位')">打排位(进行中)</a></li>
+                        <li><a onclick="showContent('回城')">回城</a></li>
+                        <li><a onclick="showContent('卖肉')">卖肉</a></li>
+                        <li><a onclick="showContent('交易')">交易</a></li>
+                        <li><a onclick="showContent('组队')">组队(进行中)</a></li>
+                        <li><a onclick="showContent('设置自动吃药')">设置自动吃药</a></li>
+                        <li><a onclick="showContent('发送动图')">开启(关闭)发送动图</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a onclick="showContent('个人信息')">个人信息</a>
+                    <ul>
+                        <li><a onclick="showContent('查看背包')">查看背包</a></li>
+                        <li><a onclick="showContent('查看装备')">查看装备</a></li>
+                        <li><a onclick="showContent('查看状态')">查看状态</a></li>
+                        <li><a onclick="showContent('查看属性')">查看属性</a></li>
+                        <li><a onclick="showContent('查看技能')">查看技能</a></li>
+                        <li><a onclick="showContent('使用技能')">使用技能</a></li>
+                        <li><a onclick="showContent('查看时装')">查看时装</a></li>
+                        <li><a onclick="showContent('查看称号')">查看称号</a></li>
+                        <li><a onclick="showContent('查看首杀')">查看首杀</a></li>
+                        <li><a onclick="showContent('查看首爆')">查看首爆</a></li>
+                        <li><a onclick="showContent('查看商铺')">查看商铺</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a onclick="showContent('商铺信息')">商铺信息</a>
+                    <ul>
+                        <li><a onclick="showContent('查看商铺装饰')">查看商铺装饰</a></li>
+                        <li><a onclick="showContent('查看商铺补给')">查看商铺补给</a></li>
+                        <li><a onclick="showContent('查看商铺强化')">查看商铺强化</a></li>
+                        <li><a onclick="showContent('查看商铺好友')">查看商铺好友</a></li>
+                        <li><a onclick="showContent('查看商铺限量')">查看商铺限量</a></li>
+                        <li><a onclick="showContent('购买')">购买</a></li>
+                        <li><a onclick="showContent('赠送')">赠送</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a onclick="showContent('地图命令')">地图命令</a>
+                    <ul>
+                        <li><a onclick="showContent('前往')">前往某个地图</a></li>
+                        <li><a onclick="showContent('下某个地图')">下某个地图(从1层下到2层)</a></li>
+                        <li><a onclick="showContent('查看附近怪物')">查看附近怪物</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a onclick="showContent('装备回收')">装备回收</a>
+                    <ul>
+                        <li><a onclick="showContent('查看回收')">查看回收</a></li>
+                        <li><a onclick="showContent('勾选回收')">勾选回收</a></li>
+                        <li><a onclick="showContent('全部勾选')">全部勾选</a></li>
+                        <li><a onclick="showContent('取消全部勾选')">取消全部勾选</a></li>
+                        <li><a onclick="showContent('一键回收')">一键回收</a></li>
+                        <li><a onclick="showContent('仓库服务')">仓库服务</a></li>
+                        <li><a onclick="showContent('实物兑换')">实物兑换</a></li>
+                        <li>
+                            <a onclick="showContent('查看分解结晶')">查看分解结晶</a>
+                            <ul>
+                                <li><a onclick="showContent('分解永恒系列')">分解永恒系列</a></li>
+                                <li><a onclick="showContent('分解刑天系列')">分解刑天系列</a></li>
+                                <li><a onclick="showContent('分解焚天系列')">分解焚天系列</a></li>
+                                <li><a onclick="showContent('分解沧澜系列')">分解沧澜系列</a></li>
+                                <li><a onclick="showContent('分解毁灭系列')">分解毁灭系列</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a onclick="showContent('NPC命令')">NPC命令</a>
+                    <ul>
+                        <li>
+                            <a onclick="showContent('世外高人')">世外高人</a>
+                            <ul>
+                                <li>
+                                    <a onclick="showContent('灭世斗笠')">灭世斗笠</a>
+                                    <ul>
+                                        <li><a onclick="showContent('合成普通斗笠')">合成普通斗笠</a></li>
+                                        <li><a onclick="showContent('合成赤月斗笠')">合成赤月斗笠</a></li>
+                                        <li><a onclick="showContent('合成永恒斗笠')">合成永恒斗笠</a></li>
+                                        <li><a onclick="showContent('合成毁灭斗笠')">合成毁灭斗笠</a></li>
+                                        <li><a onclick="showContent('合成沧天斗笠')">合成沧天斗笠</a></li>
+                                        <li><a onclick="showContent('查看灭世怪物')">查看灭世怪物</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a onclick="showContent('灭世宝石')">灭世宝石</a>
+                                    <ul>
+                                        <li><a onclick="showContent('升级宝石4')">升级宝石4</a></li>
+                                        <li><a onclick="showContent('升级宝石5')">升级宝石5</a></li>
+                                        <li><a onclick="showContent('升级宝石6')">升级宝石6</a></li>
+                                        <li><a onclick="showContent('升级宝石7')">升级宝石7</a></li>
+                                        <li><a onclick="showContent('升级宝石8')">升级宝石8</a></li>
+                                        <li><a onclick="showContent('升级宝石9')">升级宝石9</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a onclick="showContent('灭世称号')">灭世称号</a>
+                                    <ul>
+                                        <li><a onclick="showContent('升级永恒青铜')">升级永恒青铜</a></li>
+                                        <li><a onclick="showContent('升级永恒白银')">升级永恒白银</a></li>
+                                        <li><a onclick="showContent('升级永恒黄金')">升级永恒黄金</a></li>
+                                        <li><a onclick="showContent('升级永恒白金')">升级永恒白金</a></li>
+                                        <li><a onclick="showContent('升级永恒钻石')">升级永恒钻石</a></li>
+                                        <li><a onclick="showContent('升级永恒星耀')">升级永恒星耀</a></li>
+                                        <li><a onclick="showContent('升级永恒王者')">升级永恒王者</a></li>
+                                        <li><a onclick="showContent('升级永恒星辰')">升级永恒星辰</a></li>
+                                        <li><a onclick="showContent('升级永恒魔王')">升级永恒魔王</a></li>
+                                        <li><a onclick="showContent('升级永恒圣佛')">升级永恒圣佛</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a onclick="showContent('灭世神技')">灭世神技</a>
+                                    <ul>
+                                        <li><a onclick="showContent('提升神技')">提升神技</a></li>
+                                        <li><a onclick="showContent('领取大彻大悟')">领取大彻大悟</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('传送员')">传送员</a>
+                            <ul>
+                                <li><a onclick="showContent('城市传送')">城市传送</a></li>
+                                <li><a onclick="showContent('险恶区域')">险恶区域</a></li>
+                                <li><a onclick="showContent('危险区域')">危险区域</a></li>
+                                <li><a onclick="showContent('前往地图')">前往地图</a></li>
+                                <li><a onclick="showContent('下层')">下层</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('老兵')">老兵</a>
+                            <ul>
+                                <li><a onclick="showContent('PK说明')">PK说明</a></li>
+                                <li><a onclick="showContent('向商店移动')">向商店移动</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('万事通')">万事通</a>
+                            <ul>
+                                <li><a onclick="showContent('买物品')">买物品</a></li>
+                                <li><a onclick="showContent('卖物品')">卖物品</a></li>
+                                <li><a onclick="showContent('保管')">保管物品</a></li>
+                                <li><a onclick="showContent('找回')">找回物品</a></li>
+                                <li><a onclick="showContent('取回')">取回物品</a></li>
+                                <li><a onclick="showContent('金币换金条')">金币换金条</a></li>
+                                <li><a onclick="showContent('金条换金币')">金条换金币</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('充值使者')">充值使者</a>
+                        </li>
+                        <li>
+                            <a onclick="showContent('起步礼包')">起步礼包</a>
+                            <ul>
+                                <li><a onclick="showContent('领取礼包')">领取礼包</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('唯一赞助')">唯一赞助</a>
+                            <ul>
+                                <li><a onclick="showContent('赞助领取礼包1')">赞助领取礼包1</a></li>
+                                <li><a onclick="showContent('赞助领取礼包2')">赞助领取礼包2</a></li>
+                                <li><a onclick="showContent('赞助领取礼包3')">赞助领取礼包3</a></li>
+                                <li><a onclick="showContent('白嫖领取礼包1')">白嫖领取礼包1</a></li>
+                                <li><a onclick="showContent('白嫖领取礼包2')">白嫖领取礼包2</a></li>
+                                <li><a onclick="showContent('白嫖领取礼包3')">白嫖领取礼包3</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('散人打宝')">散人打宝</a>
+                            <ul>
+                                <li><a onclick="showContent('前往散人打宝')">前往散人打宝</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('天塔')">天塔(进行中)</a>
+                        </li>
+                        <li>
+                            <a onclick="showContent('BOSS之家')">BOSS之家</a>
+                            <ul>
+                                <li><a onclick="showContent('前往BOSS之家')">前往BOSS之家</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('玛雅大厅')">玛雅大厅</a>
+                            <ul>
+                                <li><a onclick="showContent('前往玛雅大厅')">前往玛雅大厅</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('神秘地图')">神秘地图</a>
+                            <ul>
+                                <li><a onclick="showContent('前往神秘地图')">前往神秘地图</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('公益捐献')">公益捐献</a>
+                            <ul>
+                                <li><a onclick="showContent('开启公益捐献')">开启公益捐献</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a onclick="showContent('永恒之力')">永恒之力</a>
+                            <ul>
+                                <li><a onclick="showContent('开启永恒之力')">开启永恒之力</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="content" id="content">
+            <div style="color:#f00;">点击左侧，右边显示详情</div>
+        </div>
+    </div>
+    <script>
+        // 你可以在这里自定义每个菜单项的内容
+        const details = {
+            '指令说明':
+                '<div class="danger custom-block"><p class="custom-block-title">咕咕鸡传奇</p><p>《咕咕鸡传奇》该游戏具有战士、魔法师和道士三种职业,所有情节的发生、经验值取得以及各种打猎、采矿等活动都是在网络上即时发生.《咕咕鸡传奇》包括白天、黑夜、贸易、物品等观念,玩家可以通过采矿、打猎等来获得货币,利用货币进行贸易.整个游戏充满了魔力,具有东方色彩.</p></div>'
+                + '</br><div class="items" data-v-a6181336=""><!--[--><div class="grid-4 item" data-v-a6181336=""><div class="VPLink no-icon VPFeature" data-v-a6181336="" data-v-a3976bdc=""><!--[--><article class="box" data-v-a3976bdc=""><div class="icon" data-v-a3976bdc="">⚡️</div><h2 class="title" data-v-a3976bdc="">永久免费</h2><p class="details" data-v-a3976bdc="">收费不一定好，免费不一定差。我们始终坚持永久免费、用爱发电的理念持续发展</p><!----></article><!--]--></div></div><div class="grid-4 item" data-v-a6181336=""><div class="VPLink no-icon VPFeature" data-v-a6181336="" data-v-a3976bdc=""><!--[--><article class="box" data-v-a3976bdc=""><div class="icon" data-v-a3976bdc="">🛠</div><h2 class="title" data-v-a3976bdc="">持续更新</h2><p class="details" data-v-a3976bdc="">咕咕鸡传奇 诞生至今已有大半年有余，直至今天我们依然还在维护和运营</p><!----></article><!--]--></div></div><div class="grid-4 item" data-v-a6181336=""><div class="VPLink no-icon VPFeature" data-v-a6181336="" data-v-a3976bdc=""><!--[--><article class="box" data-v-a3976bdc=""><div class="icon" data-v-a3976bdc="">️🎁</div><h2 class="title" data-v-a3976bdc="">周边福利</h2><p class="details" data-v-a3976bdc="">QQ群内会不定期发一些版本，群里的工具都是免费下载免费使用</p><!----></article><!--]--></div></div><!--]--></div>'
+                + '</br><div class="desc2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;主要功能比较简单，所有口令直接在QQ文本框发送到群或私聊QQ机器人就行了。机器人QQ：910862143 QQ群：977049285</div>'
+                + '</br><div class="warning custom-block"><p class="custom-block-title">请注意</p><p>我们严厉拒绝涉黑/黄赌毒/外挂/发卡/引流/灰色产业等一切违反法律法规用处的用户！<br> 也不接受这些用户的任何的需求/定制/联系和赞助！<br> 违规违法用途请勿使用本插件！</p></div>'
+                + '</br><div class="tip custom-block"><p class="custom-block-title">请注意</p><p>如果您想使用本插件，请一定要完整的阅读本文档！<br> 很多提出的事项就是您遇到问题的解决方案！！！</p></div>',
+            '普通命令': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '签到': '</br><div>在QQ文本框发送“签到”即可进行每日的签到。</div><div>签到可获得元宝，金币，经验等。如下：</div><div style="padding-top: 50px;"><img src="images/签到.png"></div>',
+            '注册': '</br><div>在QQ文本框发送“注册”可看到注册帐号的要求，名字必须7个字以内，职业，性别。如下：</div><div style="padding-top: 50px;"><img src="images/注册.png"></div>',
+            '打怪': '</br><div>在QQ文本框发送“打怪”即可进行打怪升级。打怪会获取到经验，金币，装备，元宝等物品。</div><div style="color: red;padding-left: 50px;">打怪和PK涉及到活跃值，打1只怪和pk扣1点活跃值，打小Boss扣6点，打Boss扣20点，口令如下：</div><div style="padding-left: 100px;"><span>不扣活跃值</span><span style="padding-left: 300px;">扣活跃值</span></div><div style="padding-left: 50px;"><font style="color:red">打怪</font> ----- <span>随机打地图内的怪</span> <font style="color:red;padding-left: 160px;">打怪鹿</font> ----- <span>打指定的怪物鹿</span></div><div style="padding-left: 50px;"><font style="color:red">打怪#6</font> ----- <span>随机打地图内6只怪</span><font style="color:red;padding-left: 138px;">打怪鹿#6</font> ----- <span>打指定怪物6只鹿</span></div><div>所有打怪都不再扣活跃值</div><div style="padding-top: 50px;"><img src="images/打怪.png"></div>',
+            '带装备': '</br><div>在QQ文本框发送“带装备1”即可带背包里第1个格子里的装备，前提是这个装备是能带的，其它物品不能佩戴。</div><div>背包格子查看 <a href="javascript:showContent(\'查看背包\')" style="color:red;">点击此处</a></div><div style="padding-top: 50px;"><img src="images/带装备.png"></div>',
+            '取装备': '</br><div>在QQ文本框发送“取下”开头的文字即可。如下：</div><div style="color: red;">取下左(右)戒指、取下戒指(左右都取下)、取下左(右)手镯、取下手镯(左右都取下)、取下项链、取下头盔、取下衣服、取下武器、取下护身符、取下宝石、取下鞋子、取下腰带、取下战鼓等</div><div style="padding-top: 50px;"><img src="images/取下装备.png"></div>',
+            'PK': '</br><div>一：注册：注册一个角色,注册+名字,职业(战士,法师,道士),性别(男or女)</div><div>例：注册 咕咕鸡,战士,男</div></br><div>二：挑战：注册好角色后,发送：PK+AT目标+一句话,即为攻击</div><div>例：PK@12345可敢一战！</div><div style="color: red;">注意：属性将根据你说的话计算，如果不想修改属性可以留空</div><div style="padding-top: 50px;"><img src="images/PK.png"><img src="images/PK1.png"></div>',
+            '打排位': '</br><div>在QQ文本框发送“打排位”即可进行排位PK。</div><div>PK是针对本群里的人，排位是所有群的人进行PK，根据排位场次，战斗力进行提示排位段位挑战。</div>',
+            '回城': '</br><div>在QQ文本框发送“回城”即可回到城里。</div><div>如果关闭了发送动图则只会发送文字，不会生成gif动图。</div><div style="padding-top: 50px;"><img src="images/回城1.png"><img src="images/回城.png"></div>',
+            '卖肉': '</br><div>在QQ文本框发送“卖肉”即可卖掉背包里的肉，并且必须在成中才能卖。</div><div style="padding-top: 50px;"><img src="images/卖肉.png"></div>',
+            '交易': '</br><div>在QQ文本框发送“交易#@123456#11”即可进行交易。</div><div>交易命令开头，第1个#后面是艾特某一个群里的人，第2个#是背包格子数字。</div><div style="padding-top: 50px;"><img src="images/交易.png"></div>',
+            '组队': '</br><div>在QQ文本框发送“组队#@123456”即可进行组队打怪，必须要在同一个地图中才能组队。</div><div>组队打的怪经验会有加成，一个人+10%(不限组队人数)，每个人经验根据个人经验倍数叠加，不会打一个怪所有人一样的经验。</div>',
+            '设置自动吃药': '</br><div>设置自动吃药有两种方式：</div><div style="padding-left: 50px;padding-top: 10px;color: red;"><span>1.设置普通自动吃药50</span><span style="padding-left: 100px;">当HP低于50时会自动吃背包里的药</span></div><div style="padding-left: 50px;color: red;"><span>2.设置百分比自动吃药50</span><span style="padding-left: 84px;">当HP低于50%时会自动吃背包里的药</span></div><div style="padding-top: 50px;"><img src="images/自动吃药.png"></div>',
+            '发送动图': '</br><div>在QQ文本框发送“开启发送动图”即可开启动图生成发送。</div><div>在QQ文本框发送“关闭发送动图”即可关闭动图生成发送。</div><div>动图当前仅支持回城，打怪，前往地图，下地图。</div><div style="padding-top: 50px;"><img src="images/发送动图.png"></div>',
+            '个人信息': '</br><div>个人信息相关的命令。</div>',
+            '使用技能': '</br><div>在QQ文本框发送“使用技能1”即可开启个人技能使用。</div><div>1是第1个技能，2是第2个技能，以此类推，输入 <a href="javascript:showContent(\'查看技能\')" style="color:red;">查看技能</a> 可查看自己技能面板。</div><div style="color: red;">请注意：再次使用技能则取消使用。 </div><div style="color: red;">技能翻页：输入 “下一页”可查看下一页的技能，输入 “上一页”可查看上一页的技能。</div><div style="padding-top: 50px;"><img src="images/使用技能.png"><img src="images/技能翻页.png"></div>',
+            '查看背包': '</br><div>在QQ文本框发送“查看背包”即可查看个人背包。</div><div>“查看背包1”即可查看背包格子第1个装备详情，背包格子背包中每个格子的左下角那个数字</div><div>注意：背包中右上角带箭头的装备是极品装备，不是本职业极品装备</div><div style="padding-top: 50px;"><img src="images/查看背包.png"><img src="images/查看背包1.png"></div>',
+            '查看装备': '</br><div>在QQ文本框发送“查看装备”即可查看个人装备。</div><div style="padding-top: 50px;"><img src="images/查看装备.png"><img src="images/查看装备1.png"></div>',
+            '查看状态': '</br><div>在QQ文本框发送“查看状态”即可查看个人状态。</div><div style="padding-top: 50px;"><img src="images/查看状态.png"><img src="images/查看状态1.png"></div>',
+            '查看属性': '</br><div>在QQ文本框发送“查看属性”即可查看个人属性。</div><div style="padding-top: 50px;"><img src="images/查看属性.png"><img src="images/查看属性1.png"></div></div>',
+            '查看技能': '</br><div>在QQ文本框发送“查看技能”即可查看个人技能。</div><div>使用技能 <a href="javascript:showContent(\'使用技能\')" style="color:red;">点击此处</a></div><div style="padding-top: 50px;"><img src="images/查看技能.png"><img src="images/查看技能1.png"></div></div>',
+            '查看时装': '</br><div>在QQ文本框发送“查看时装”即可查看个人时装。</div><div style="padding-top: 50px;"><img src="images/查看时装.png"><img src="images/查看时装1.png"></div></div>',
+            '查看称号': '</br><div>在QQ文本框发送“查看称号”即可查看个人称号。</div><div>查看称号1 即可查看称号第1个称号详情，以此类推。</div><div style="padding-top: 50px;"><img src="images/查看称号.png"><img src="images/查看称号1.png"><img src="images/查看称号11.png"></div>',
+            '查看首杀': '</br><div>在QQ文本框发送“查看首杀”即可查看怪物首杀奖励信息。</div><div>查看首杀翻页  查看首杀1 是查看第1页，2是第2页，以此类推。</div><div style="padding-top: 50px;"><img src="images/查看首杀.png"><img src="images/查看首杀1.png"><img src="images/查看首杀11.png"></div></div>',
+            '查看首爆': '</br><div>在QQ文本框发送“查看爆”即可查看装备首爆奖励信息。</div><div>查看首爆翻页  查看首爆1 是查看第1页，2是第2页，以此类推。</div><div style="padding-top: 50px;"><img src="images/查看首爆.png"><img src="images/查看首爆1.png"><img src="images/查看首爆11.png"></div></div>',
+            '商铺信息': '</br><div>商铺信息相关的命令。</div>',
+            '查看商铺': '</br><div>在QQ文本框发送“查看商铺”即可查看商铺内卖的物品及道具信息。</div><div style="padding-top: 50px;"><img src="images/查看商铺装饰.png"><img src="images/查看商铺装饰1.png"></div>',
+            '查看商铺装饰': '</br><div>在QQ文本框发送“查看商铺装饰”即可查看商铺内卖的物品及道具信息。</div><div style="padding-top: 50px;"><img src="images/查看商铺装饰.png"><img src="images/查看商铺装饰1.png"></div>',
+            '查看商铺补给': '</br><div>在QQ文本框发送“查看商铺补给”即可查看商铺内卖的物品及道具信息。</div><div style="padding-top: 50px;"><img src="images/查看商铺补给.png"><img src="images/查看商铺补给1.png"></div>',
+            '查看商铺强化': '</br><div>在QQ文本框发送“查看商铺强化”即可查看商铺内卖的物品及道具信息。</div><div style="padding-top: 50px;"><img src="images/查看商铺强化.png"><img src="images/查看商铺强化1.png"></div>',
+            '查看商铺好友': '</br><div>在QQ文本框发送“查看商铺好友”即可查看商铺内卖的物品及道具信息。</div><div style="padding-top: 50px;"><img src="images/查看商铺好友.png"><img src="images/查看商铺好友1.png"></div>',
+            '查看商铺限量': '</br><div>在QQ文本框发送“查看商铺限量”即可查看商铺内卖的物品及道具信息。</div><div style="padding-top: 50px;"><img src="images/查看商铺限量.png"><img src="images/查看商铺限量1.png"></div>',
+            '购买': '</br><div>在QQ文本框发送“购买#强效金创药#3”即可购买到商铺内的物品。</div><div style="color: red;">购买是关键词，第一个#后跟物品名称，第二个#后面跟物品数量(最多买10000个)。查看商铺所有物品都可以直接购买，不需要定位到那一页。</div><div style="padding-top: 50px;"><img src="images/购买物品.png"></div>',
+            '赠送': '</br><div>在QQ文本框发送“赠送#@123456#强效金创药#3”即可赠送给某人商铺内的物品。</div><div style="color: red;">和购买功能一样，赠送是关键词，第一个#后是赠送给谁，第二个#后赠送的物品名称，第三个#后是赠送的物品数量。</div><div style="padding-top: 50px;"><img src="images/赠送物品.png"></div>',
+            'NPC命令': '</br><div>所有NPC相关的命令在这里。</div>',
+            '传送员': '</br><div>在QQ文本框发送“传送员”即可在各大城市和打怪地图进行传送服务。传送时会收取适当的费用，请准备好金币。</div><div style="padding-top: 50px;"><img src="images/传送员.png"><img src="images/传送员1.png"></div>',
+            '城市传送': '</br><div>在QQ文本框发送“城市传送”即可在各大城市间进行传送服务。传送时会收取适当的费用，请准备好金币。</div><div style="padding-top: 50px;"><img src="images/城市传送.png"><img src="images/城市传送1.png"></div>',
+            '险恶区域': '</br><div>在QQ文本框发送“险恶区域”即可前往打怪地图传送服务。传送时会收取适当的费用，请准备好金币。</div><div>地图后面的3层表示当前地图共有3层，如：兽人古墓(3层)</div><div style="padding-top: 50px;"><img src="images/险恶区域.png"><img src="images/险恶区域1.png"></div>',
+            '危险区域': '</br><div>在QQ文本框发送“危险区域”即可前往打怪地图传送服务。传送时会收取适当的费用，请准备好金币。</div><div style="padding-top: 50px;"><img src="images/危险区域.png"><img src="images/危险区域1.png"></div>',
+            '前往地图': '</br><div>在QQ文本框发送“前往+地图名”即可前往打怪地图传送服务。传送时会收取适当的费用，请准备好金币。</div><div>例如：前往兽人古墓  没有开启发送动图则不生成动图</div><div style="padding-top: 50px;"><img src="images/前往兽人古墓.png"><img src="images/前往兽人古墓1.png"></div>',
+            '下层': '</br><div>在QQ文本框发送“下图+地图名”即可前往打怪地图传送服务。传送时会收取适当的费用，请准备好金币。</div><div>例如：下图兽人古墓2  这是从兽人古墓1 下到 兽人古墓2 。</div><div>也可以从兽人古墓2 下到 兽人古墓1。如果没有开启发送动图则不生成动图</div><div style="padding-top: 50px;"><img src="images/下图.png"><img src="images/下图1.png"></div>',
+            '老兵': '</br><div>在QQ文本框发送“老兵”可查看PK说明和进行商店传送(已废除)。</div><div style="padding-top: 50px;"><img src="images/老兵.png"></div>',
+            'PK说明': '</br><div>在QQ文本框发送“pk”可查看PK说明。</div><div style="padding-top: 50px;"><img src="images/PK说明.png"></div>',
+            '向商店移动': '</br><div>在QQ文本框发送“向商店移动”可查看相关商店，之前版本是去往对应的商店买卖物品，后来废除了。</div><div style="padding-top: 50px;"><img src="images/向商店移动.png"></div>',
+            '万事通': '</br><div>在QQ文本框发送“万事通”可进行买卖物品，仓库存储，换金条换金币操作，前提是必须要在城里。</div><div style="padding-top: 50px;"><img src="images/万事通.png"></div>',
+            '买物品': '</br><div>在QQ文本框发送“买物品”可进行买物品操作，前提是必须要在城里。</div><div>买物品时发送“上一页”“下一页”进行翻页，快速定位到某一页物品发送 买物品,3 到买物品栏的第3页</div><div>买某一项物品发送 买物品+物品名#+数量  例如： <span style="color:red;">买物品强效金创药#3</span> 就是买3瓶金创药，背包格子必须足够。</div><div style="padding-top: 50px;"><img src="images/买物品.png"><img src="images/买物品1.png"><img src="images/买物品2.png"><img src="images/买物品3.png"><img src="images/买物品4.png"><img src="images/买物品5.png"></div>',
+            '卖物品': '</br><div>在QQ文本框发送“卖物品”可进行卖物品操作，前提是必须要在城里。</div><div style="padding-top: 50px;"><img src="images/卖物品.png"><img src="images/卖物品1.png"></div>',
+            '保管': '</br><div>在QQ文本框发送“保管”可将物品存在个人仓库里，前提是必须要在城里。</div><div>保管背包里第8个物品，发送 保管8 即可。</div><div style="padding-top: 50px;"><img src="images/保管.png"></div>',
+            '找回': '</br><div>在QQ文本框发送“找回”可将个人仓库里的物品找回。</div><div>在QQ文本框发送“找回3”可进行翻页到第3页找回物品。</div><div style="padding-top: 50px;"><img src="images/找回.png"><img src="images/找回1.png"></div>',
+            '取回': '</br><div>在QQ文本框发送“取回+数字”可将个人仓库里的物品取回到背包里。</div><div>发送 取回16 则取回仓库里第16个物品。</div><div style="padding-top: 50px;"><img src="images/取回.png"></div>',
+            '金币换金条': '</br><div>在QQ文本框发送“金币换金条#数字”可将背包里的金币换成金条，数字是几就是换几个金条。金条比例1：100W</div><div style="padding-top: 50px;"><img src="images/金币换金条.png"><img src="images/金币换金条1.png"></div>',
+            '金条换金币': '</br><div>在QQ文本框发送“金条换金币#数字”可将背包里的金条换成金币，数字是几就是换几个金条。金条比例1：100W</div><div style="padding-top: 50px;"><img src="images/金条换金币.png"><img src="images/金条换金币1.png"></div>',
+            '充值使者': '</br><div>在QQ文本框发送“充值使者”可查看充值信息。</div><div style="padding-top: 50px;"><img src="images/充值使者.png"></div>',
+            '起步礼包': '</br><div>在QQ文本框发送“起步礼包”可查看起步礼包信息，前提是必须要在城里。</div><div style="padding-top: 50px;"><img src="images/起步礼包.png"><img src="images/起步礼包1.png"></div>',
+            '领取礼包': '</br><div>在QQ文本框发送“礼包码666666”可领取起步礼包。<div><div>起步礼包包含衣服，武器，头盔，手镯，戒指，项链，外加青铜VIP。<div><div style="padding-top: 50px;"><img src="images/领取礼包.png"></div>',
+            '唯一赞助': '</br><div>在QQ文本框发送“唯一赞助”可查看唯一赞助信息，前提是必须要在城里。</div><div style="padding-top: 50px;"><img src="images/唯一赞助.png"><img src="images/唯一赞助1.png"></div>',
+            '赞助领取礼包1': '</br><div>在QQ文本框发送“赞助领取礼包1”可领取赞助1礼包，扣10金刚石，前提是必须要在城里。会员等级可提升到白银。</div><div style="padding-top: 50px;"><img src="images/赞助领取礼包1.png"></div>',
+            '赞助领取礼包2': '</br><div>在QQ文本框发送“赞助领取礼包2”可领取赞助2礼包，扣20金刚石，前提是必须要在城里。会员等级可提升到黄金。</div><div style="padding-top: 50px;"><img src="images/赞助领取礼包2.png"></div>',
+            '赞助领取礼包3': '</br><div>在QQ文本框发送“赞助领取礼包3”可领取赞助3礼包，扣30金刚石，前提是必须要在城里。会员等级可提升到钻石。</div><div style="padding-top: 50px;"><img src="images/赞助领取礼包3.png"></div>',
+            '白嫖领取礼包1': '</br><div>在QQ文本框发送“白嫖领取礼包1”可领取赞助1礼包，扣2000元宝。内容和赞助领取一样</div>',
+            '白嫖领取礼包2': '</br><div>在QQ文本框发送“白嫖领取礼包2”可领取赞助2礼包，扣4000元宝。内容和赞助领取一样</div>',
+            '白嫖领取礼包3': '</br><div>在QQ文本框发送“白嫖领取礼包3”可领取赞助3礼包，扣6000元宝。内容和赞助领取一样</div>',
+            '散人打宝': '</br><div>在QQ文本框发送“散人打宝”可查看散人打宝地图信息。</div><div style="padding-top: 50px;"><img src="images/散人打宝.png"></div>',
+            '前往散人打宝': '</br><div>在QQ文本框发送“前往散人打宝”可前往散人打宝地图打怪。</div><div>散人打宝有2层，可下层。</div><div style="padding-top: 50px;"><img src="images/前往散人打宝.png"></div>',
+            '天塔': '</br><div>在QQ文本框发送“天塔”可查看天塔地图信息。</div><div style="padding-top: 50px;"><img src="images/天塔.png"></div>',
+            'boss之家': '</br><div>在QQ文本框发送“boss之家”可查看BOSS之家地图信息。</div><div style="padding-top: 50px;"><img src="images/BOSS之家.png"></div>',
+            '前往boss之家': '</br><div>在QQ文本框发送“前往boss之家”可前往boss之家地图打怪，为了方便就直接小写吧。</div><div style="padding-top: 50px;"><img src="images/前往BOSS之家.png"></div>',
+            '玛雅大厅': '</br><div>在QQ文本框发送“玛雅大厅”可查看玛雅大厅地图信息。</div><div style="padding-top: 50px;"><img src="images/玛雅大厅.png"></div>',
+            '前往玛雅大厅': '</br><div>在QQ文本框发送“前往玛雅大厅”可前往散人打宝地图打怪。</div><div>玛雅大厅有3层，可下层。</div><div style="padding-top: 50px;"><img src="images/前往玛雅大厅.png"></div>',
+            '神秘地图': '</br><div>在QQ文本框发送“神秘地图”可查看神秘地图地图信息。</div><div style="padding-top: 50px;"><img src="images/神秘地图.png"></div>',
+            '前往神秘地图': '</br><div>在QQ文本框发送“前往神秘地图”可前往散人打宝地图打怪。</div><div>神秘地图有2层，可下层。</div><div style="padding-top: 50px;"><img src="images/前往神秘地图.png"></div>',
+            '公益捐献': '</br><div>在QQ文本框发送“公益捐献”可查看公益捐献内容，前提是必须要在城里。</div><div style="padding-top: 50px;"><img src="images/公益捐献.png"></div>',
+            '开启公益捐献': '</br><div>QQ文本框发送“开启公益捐献”可开启公益捐献获得永久鞭尸称号，开启需要2000元宝。</div><div style="padding-top: 50px;"><img src="images/开启公益捐献.png"><img src="images/开启公益捐献1.png"></div>',
+            '永恒之力': '</br><div>在QQ文本框发送“永恒之力”可查看永恒之力内容，前提是必须要在城里。</div><div style="padding-top: 50px;"><img src="images/永恒之力.png"></div>',
+            '开启永恒之力': '</br><div>QQ文本框发送“开启永恒之力”可开启永恒之力获得攻魔道属性，开启需要200元宝。</div><div style="padding-top: 50px;"><img src="images/开启永恒之力.png"><img src="images/开启永恒之力1.png"></div>',
+            '地图命令': '</br><div>所有地图相关的命令。</div>',
+            '前往': '</br><div>QQ文本框发送“前往+地图名”可前往某个地图打怪。</div><div style="padding-top: 50px;"><img src="images/前往.png"><img src="images/前往1.png"></div>',
+            '下某个地图': '</br><div>QQ文本框发送“下图+地图名+层数”可前往某个地图打怪。例如 下图蜈蚣洞2 </div><div style="padding-top: 100px;"><a style="color:red;" href="javascript:showContent(\'下层\')">点击查看</a></div>',
+            '查看附近怪物': '</br><div>QQ文本框发送“查看附近怪物”可查看所在地图中的怪物有哪些。</div><div style="padding-top: 50px;"><img src="images/查看附近怪物.png"><img src="images/查看附近怪物1.png"></div>',
+            '装备回收': '</br><div>QQ文本框发送“装备回收 或 回收装备”可查看回收的装备类型有哪些。</div><div style="padding-top: 50px;"><img src="images/装备回收.png"><img src="images/装备回收1.png"></div>',
+            '查看回收': '</br><div>QQ文本框发送“查看垃圾系列”可查看回收的装备详情。</div><div style="padding-top: 50px;"><img src="images/查看垃圾系列.png"><img src="images/查看垃圾系列1.png"></div>',
+            '勾选回收': '</br><div>QQ文本框发送“勾选垃圾系列”可查看回收的装备详情。</div><div>所有多选框都可以勾选，自动回收框必须会员达到黄金以上才可以勾选。</div><div style="padding-top: 50px;"><img src="images/勾选垃圾系列.png"><img src="images/勾选垃圾系列1.png"></div>',
+            '取消勾选回收': '</br><div>QQ文本框发送“取消勾选垃圾系列”可查看回收的装备详情。</div><div style="padding-top: 50px;"><img src="images/取消勾选垃圾系列.png"><img src="images/取消勾选垃圾系列1.png"></div>',
+            '全部勾选': '</br><div>QQ文本框发送“全部勾选”可将所有回收多选框都选中，表示所有装备全回收。</div><div style="padding-top: 50px;"><img src="images/全部勾选.png"><img src="images/全部勾选1.png"></div>',
+            '取消全部勾选': '</br><div>QQ文本框发送“取消全部勾选”可将所有回收多选框都取消选中。</div><div style="padding-top: 50px;"><img src="images/取消全部勾选.png"><img src="images/取消全部勾选1.png"></div>',
+            '一键回收': '</br><div>QQ文本框发送“一键回收”可查看回收的装备详情。</div><div style="color:red;">请注意，只有勾选的装备类型才能回收！！！不勾选是不会回收的！！！</div><div style="color:red;">请注意，只有勾选的装备类型才能回收！！！不勾选是不会回收的！！！</div><div style="color:red;">请注意，只有勾选的装备类型才能回收！！！不勾选是不会回收的！！！</div><div style="padding-top: 50px;"><img src="images/一键回收.png"><img src="images/一键回收1.png"></div>',
+            '仓库服务': '</br><div>QQ文本框发送“仓库服务”可远程存取仓库服务。</div><div style="color:red;">请注意，只有会员才可以远程仓库服务，仓库里的口令和城里使用仓库口令一样。</div><div style="padding-top: 50px;"><img src="images/仓库服务.png"><img src="images/仓库服务1.png"></div>',
+            '实物兑换': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '查看分解结晶': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '分解永恒系列': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '分解刑天系列': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '分解焚天系列': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '分解沧澜系列': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '分解毁灭系列': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '其它命令': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '其它命令': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '其它命令': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '其它命令': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '其它命令': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+            '其它命令': '</br><div>用户常用的一些基础的命令以及相关介绍。</div>',
+        };
+        function showContent(key) {
+            document.getElementById('content').innerHTML = `<div class='titleDesc'>${key}</div><p>${details[key] || '暂无内容'}</p>`;
+
+
+        }
+    </script>
+</body>
+</html>

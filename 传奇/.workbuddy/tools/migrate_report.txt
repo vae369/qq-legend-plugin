@@ -1,0 +1,36 @@
+﻿equals rules: 180
+startswith rules: 35
+add using: 1
+drop MQinfo region: 1
+replace MQEvent head: 1
+return 1 -> return: 5
+image tag: 69
+at tag: 6
+at tag (concat): 0
+group list -> current group: 8
+group id trim: 22
+drop broadcast sleep: 8
+send (main): 149
+send (menu): 6
+send (broadcast): 14
+get nickname (self): 2
+get nickname (target): 1
+menu calls: 6
+menu signatures (private): 5
+menu signature (LegendMenu): 1
+upvote call: 1
+upvote body replace: 1
+drop MQset/MQend regions: 1
+remaining Api.ApiSendMsg         0
+remaining Api.ApiGetGroupList    0
+remaining Api.ApiGetNick         0
+remaining Api.ApiUpVote          0
+remaining RobotQQ                1
+remaining robotQQ                0
+remaining groupQQ                0
+remaining MQEvent                1
+remaining MQinfo                 0
+remaining MQset                  0
+remaining MQend                  0
+remaining return 1;              0
+QQMain.cs bytes: 142303 -> 142303

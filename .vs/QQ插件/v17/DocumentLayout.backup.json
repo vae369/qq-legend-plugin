@@ -1,0 +1,135 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\qq\\QQ\u63D2\u4EF6\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\qqmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|solutionrelative:\u4F20\u5947\\qqmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|e:\\qq\\qq\u63D2\u4EF6\\\u4F20\u5947\\mirtest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|solutionrelative:\u4F20\u5947\\mirtest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|e:\\qq\\qq\u63D2\u4EF6\\\u4F20\u5947\\mirnpctest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|solutionrelative:\u4F20\u5947\\mirnpctest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|e:\\qq\\qq\u63D2\u4EF6\\\u4F20\u5947\\frmmagictest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|solutionrelative:\u4F20\u5947\\frmmagictest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|solutionrelative:\u4F20\u5947\\formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|e:\\qq\\qq\u63D2\u4EF6\\\u4F20\u5947\\frmmagictest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|solutionrelative:\u4F20\u5947\\frmmagictest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B33725F-9A83-471B-9C4B-366AB6BBA561}|\u4F20\u5947\\\u4F20\u5947.csproj|solutionrelative:\u4F20\u5947\\formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MirTest.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\MirTest.cs",
+              "RelativeDocumentMoniker": "\u4F20\u5947\\MirTest.cs",
+              "ToolTip": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\MirTest.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "\u4F20\u5947\\MirTest.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-12T08:54:54.248Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MirNpcTest.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\MirNpcTest.cs",
+              "RelativeDocumentMoniker": "\u4F20\u5947\\MirNpcTest.cs",
+              "ToolTip": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\MirNpcTest.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "\u4F20\u5947\\MirNpcTest.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-12T08:54:51.373Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FrmMagicTest.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FrmMagicTest.cs",
+              "RelativeDocumentMoniker": "\u4F20\u5947\\FrmMagicTest.cs",
+              "ToolTip": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FrmMagicTest.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "\u4F20\u5947\\FrmMagicTest.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-12T08:54:43.898Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "FrmMagicTest.cs",
+              "DocumentMoniker": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FrmMagicTest.cs",
+              "RelativeDocumentMoniker": "\u4F20\u5947\\FrmMagicTest.cs",
+              "ToolTip": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FrmMagicTest.cs",
+              "RelativeToolTip": "\u4F20\u5947\\FrmMagicTest.cs",
+              "ViewState": "AgIAAFEBAAAAAAAAAAAmwIIBAABZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-27T01:29:09.996Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "QQMain.cs",
+              "DocumentMoniker": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\QQMain.cs",
+              "RelativeDocumentMoniker": "\u4F20\u5947\\QQMain.cs",
+              "ToolTip": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\QQMain.cs",
+              "RelativeToolTip": "\u4F20\u5947\\QQMain.cs",
+              "ViewState": "AgIAAB8EAAAAAAAAAAAAAB8EAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-15T08:24:36.325Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "FormMain.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FormMain.cs",
+              "RelativeDocumentMoniker": "\u4F20\u5947\\FormMain.cs",
+              "ToolTip": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FormMain.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "\u4F20\u5947\\FormMain.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-12T04:38:33.334Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "FormMain.cs",
+              "DocumentMoniker": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FormMain.cs",
+              "RelativeDocumentMoniker": "\u4F20\u5947\\FormMain.cs",
+              "ToolTip": "E:\\qq\\QQ\u63D2\u4EF6\\\u4F20\u5947\\FormMain.cs",
+              "RelativeToolTip": "\u4F20\u5947\\FormMain.cs",
+              "ViewState": "AgIAAFoEAAAAAAAAAAAvwHUEAABGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-12T03:28:58.285Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

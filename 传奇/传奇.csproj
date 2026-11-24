@@ -1,0 +1,363 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1B33725F-9A83-471B-9C4B-366AB6BBA561}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>传奇</RootNamespace>
+    <AssemblyName>传奇.MQ</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <DllExportNamespace>System.Runtime.InteropServices</DllExportNamespace>
+    <DllExportDDNSCecil>true</DllExportDDNSCecil>
+    <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
+    <DllExportGenExpLib>false</DllExportGenExpLib>
+    <DllExportOurILAsm>false</DllExportOurILAsm>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DllExport, Version=1.5.2.30304, Culture=neutral, PublicKeyToken=8337224c9ad9e356, processorArchitecture=MSIL">
+      <HintPath>..\packages\DllExport.1.5.2\lib\net20\DllExport.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Magick.NET-Q16-AnyCPU, Version=13.10.0.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">
+      <HintPath>..\packages\Magick.NET-Q16-AnyCPU.13.10.0\lib\netstandard20\Magick.NET-Q16-AnyCPU.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Magick.NET.Core, Version=13.10.0.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">
+      <HintPath>..\packages\Magick.NET.Core.13.10.0\lib\netstandard20\Magick.NET.Core.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Api.cs" />
+    <Compile Include="core\FileHelper.cs" />
+    <Compile Include="core\FormattedText.cs" />
+    <Compile Include="core\IniFileHelper.cs" />
+    <Compile Include="core\TextHelper.cs" />
+    <Compile Include="FormMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormMain.Designer.cs">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEditMap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmEditMap.Designer.cs">
+      <DependentUpon>FrmEditMap.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEditUser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmEditUser.Designer.cs">
+      <DependentUpon>FrmEditUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmImage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmImage.Designer.cs">
+      <DependentUpon>FrmImage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmMagicTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMagicTest.Designer.cs">
+      <DependentUpon>FrmMagicTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MirNpcTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirNpcTest.Designer.cs">
+      <DependentUpon>MirNpcTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MirTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirTest.Designer.cs">
+      <DependentUpon>MirTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FirstKillMon.cs" />
+    <Compile Include="Models\LegendFilePath.cs" />
+    <Compile Include="Models\LegMapMonInfo.cs" />
+    <Compile Include="Models\LengendBase.cs" />
+    <Compile Include="Models\LengendMapInfo.cs" />
+    <Compile Include="Models\MagicDB.cs" />
+    <Compile Include="Models\MonBoss.cs" />
+    <Compile Include="Models\MonQuest.cs" />
+    <Compile Include="Models\MonsterDB.cs" />
+    <Compile Include="Models\StditemConfig.cs" />
+    <Compile Include="Models\StditemDB.cs" />
+    <Compile Include="Models\StdItemDropTip.cs" />
+    <Compile Include="Models\UserAttackRecord.cs" />
+    <Compile Include="Models\UserInfo.cs" />
+    <Compile Include="Models\UserInfo_Manager.cs" />
+    <Compile Include="Models\UserKey.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="QQMain.cs" />
+    <Compile Include="Qiancao\QiancaoSdk.cs" />
+    <Compile Include="Qiancao\QiancaoPlugin.cs" />
+    <Compile Include="Qiancao\CommandRules.cs" />
+    <Compile Include="Service\LegendApi.cs" />
+    <Compile Include="Service\MagicApiImg.cs" />
+    <Compile Include="Service\MapApi.cs" />
+    <Compile Include="Service\Market_DefApi.cs" />
+    <Compile Include="Service\MonsterApi.cs" />
+    <Compile Include="Service\NPCApi.cs" />
+    <Compile Include="Service\PrizeApi.cs" />
+    <Compile Include="Service\StoreApi.cs" />
+    <Compile Include="Service\UserInfoApi.cs" />
+    <Compile Include="Service\UserInfoImg.cs" />
+    <Compile Include="Service\UserInfoImg2.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FormMain.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEditMap.resx">
+      <DependentUpon>FrmEditMap.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEditUser.resx">
+      <DependentUpon>FrmEditUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmImage.resx">
+      <DependentUpon>FrmImage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmMagicTest.resx">
+      <DependentUpon>FrmMagicTest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirNpcTest.resx">
+      <DependentUpon>MirNpcTest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirTest.resx">
+      <DependentUpon>MirTest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FodyWeavers.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Resources\userinfo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\xing.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\yueliang1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\taiyang1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FodyWeavers.xml" />
+    <Content Include="images\金币换金条1.png" />
+    <Content Include="images\金币换金条.png" />
+    <Content Include="images\金条换金币1.png" />
+    <Content Include="images\金条换金币.png" />
+    <Content Include="images\仓库服务1.png" />
+    <Content Include="images\仓库服务.png" />
+    <Content Include="images\取消全部勾选1.png" />
+    <Content Include="images\取消全部勾选.png" />
+    <Content Include="images\全部勾选1.png" />
+    <Content Include="images\全部勾选.png" />
+    <Content Include="images\一键回收1.png" />
+    <Content Include="images\一键回收.png" />
+    <Content Include="images\取消勾选垃圾系列1.png" />
+    <Content Include="images\取消勾选垃圾系列.png" />
+    <Content Include="images\勾选垃圾系列1.png" />
+    <Content Include="images\勾选垃圾系列.png" />
+    <Content Include="images\查看垃圾系列1.png" />
+    <Content Include="images\查看垃圾系列.png" />
+    <Content Include="images\装备回收1.png" />
+    <Content Include="images\装备回收.png" />
+    <Content Include="images\查看附近怪物1.png" />
+    <Content Include="images\查看附近怪物.png" />
+    <Content Include="images\BOSS之家.png" />
+    <Content Include="images\前往1.png" />
+    <Content Include="images\前往.png" />
+    <Content Include="images\前往BOSS之家.png" />
+    <Content Include="images\开启永恒之力1.png" />
+    <Content Include="images\开启永恒之力.png" />
+    <Content Include="images\永恒之力.png" />
+    <Content Include="images\开启公益捐献1.png" />
+    <Content Include="images\开启公益捐献.png" />
+    <Content Include="images\公益捐献.png" />
+    <Content Include="images\前往神秘地图.png" />
+    <Content Include="images\前往玛雅大厅.png" />
+    <Content Include="images\前往散人打宝.png" />
+    <Content Include="images\神秘地图.png" />
+    <Content Include="images\玛雅大厅.png" />
+    <Content Include="images\散人打宝.png" />
+    <Content Include="images\赞助领取礼包3.png" />
+    <Content Include="images\赞助领取礼包2.png" />
+    <Content Include="images\赞助领取礼包1.png" />
+    <Content Include="images\唯一赞助1.png" />
+    <Content Include="images\唯一赞助.png" />
+    <Content Include="images\领取礼包.png" />
+    <Content Include="images\起步礼包1.png" />
+    <Content Include="images\起步礼包.png" />
+    <Content Include="images\充值使者.png" />
+    <Content Include="images\捆金条1.png" />
+    <Content Include="images\捆金条.png" />
+    <Content Include="images\取回.png" />
+    <Content Include="images\找回1.png" />
+    <Content Include="images\找回.png" />
+    <Content Include="images\保管.png" />
+    <Content Include="images\卖物品1.png" />
+    <Content Include="images\卖物品.png" />
+    <Content Include="images\买物品5.png" />
+    <Content Include="images\买物品4.png" />
+    <Content Include="images\买物品3.png" />
+    <Content Include="images\买物品2.png" />
+    <Content Include="images\买物品1.png" />
+    <Content Include="images\买物品.png" />
+    <Content Include="images\万事通.png" />
+    <Content Include="images\下图1.png" />
+    <Content Include="images\下图.png" />
+    <Content Include="images\前往兽人古墓1.png" />
+    <Content Include="images\前往兽人古墓.png" />
+    <Content Include="images\向商店移动.png" />
+    <Content Include="images\PK说明.png" />
+    <Content Include="images\老兵.png" />
+    <Content Include="images\危险区域1.png" />
+    <Content Include="images\危险区域.png" />
+    <Content Include="images\险恶区域1.png" />
+    <Content Include="images\险恶区域.png" />
+    <Content Include="images\城市传送1.png" />
+    <Content Include="images\城市传送.png" />
+    <Content Include="images\传送员1.png" />
+    <Content Include="images\传送员.png" />
+    <Content Include="images\赠送物品.png" />
+    <Content Include="images\购买物品.png" />
+    <Content Include="images\查看商铺限量1.png" />
+    <Content Include="images\查看商铺限量.png" />
+    <Content Include="images\查看商铺好友1.png" />
+    <Content Include="images\查看商铺好友.png" />
+    <Content Include="images\查看商铺强化1.png" />
+    <Content Include="images\查看商铺强化.png" />
+    <Content Include="images\查看商铺补给1.png" />
+    <Content Include="images\查看商铺补给.png" />
+    <Content Include="images\查看商铺装饰1.png" />
+    <Content Include="images\查看商铺装饰.png" />
+    <Content Include="images\查看首爆11.png" />
+    <Content Include="images\查看首爆1.png" />
+    <Content Include="images\查看首爆.png" />
+    <Content Include="images\查看首杀11.png" />
+    <Content Include="images\查看首杀1.png" />
+    <Content Include="images\查看首杀.png" />
+    <Content Include="images\查看称号11.png" />
+    <Content Include="images\查看称号1.png" />
+    <Content Include="images\查看称号.png" />
+    <Content Include="images\查看时装1.png" />
+    <Content Include="images\查看时装.png" />
+    <Content Include="images\查看技能1.png" />
+    <Content Include="images\查看技能.png" />
+    <Content Include="images\查看属性1.png" />
+    <Content Include="images\查看属性.png" />
+    <Content Include="images\查看状态1.png" />
+    <Content Include="images\查看状态.png" />
+    <Content Include="images\查看装备1.png" />
+    <Content Include="images\查看装备.png" />
+    <Content Include="images\查看背包1.png" />
+    <Content Include="images\查看背包.png" />
+    <Content Include="images\技能翻页.png" />
+    <Content Include="images\使用技能.png" />
+    <Content Include="images\发送动图.png" />
+    <Content Include="images\自动吃药.png" />
+    <Content Include="images\交易.png" />
+    <Content Include="images\卖肉.png" />
+    <Content Include="images\回城1.png" />
+    <Content Include="images\回城.png" />
+    <Content Include="images\PK1.png" />
+    <Content Include="images\PK.png" />
+    <Content Include="images\取下装备.png" />
+    <Content Include="images\guguji.gif" />
+    <Content Include="images\带装备.png" />
+    <Content Include="images\打怪.png" />
+    <Content Include="images\注册.png" />
+    <Content Include="images\签到.png" />
+    <Content Include="index.html" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="../packages/DllExport.1.5.2/tools/net.r_eg.DllExport.targets" Condition="Exists('../packages/DllExport.1.5.2/tools/net.r_eg.DllExport.targets')" />
+  <Import Project="..\packages\Magick.NET-Q16-AnyCPU.13.10.0\build\netstandard20\Magick.NET-Q16-AnyCPU.targets" Condition="Exists('..\packages\Magick.NET-Q16-AnyCPU.13.10.0\build\netstandard20\Magick.NET-Q16-AnyCPU.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Magick.NET-Q16-AnyCPU.13.10.0\build\netstandard20\Magick.NET-Q16-AnyCPU.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Magick.NET-Q16-AnyCPU.13.10.0\build\netstandard20\Magick.NET-Q16-AnyCPU.targets'))" />
+    <Error Condition="!Exists('..\packages\Fody.6.9.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.9.3\build\Fody.targets'))" />
+  </Target>
+  <Import Project="..\packages\Fody.6.9.3\build\Fody.targets" Condition="Exists('..\packages\Fody.6.9.3\build\Fody.targets')" />
+</Project>

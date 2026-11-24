@@ -1,0 +1,14 @@
+E:\qq\QQ插件\传奇\bin\Debug\Magick.Native-Q16-arm64.dll
+E:\qq\QQ插件\传奇\bin\Debug\Magick.Native-Q16-x64.dll
+E:\qq\QQ插件\传奇\bin\Debug\Magick.Native-Q16-x86.dll
+E:\qq\QQ插件\传奇\bin\Debug\传奇.MQ.pdb
+E:\qq\QQ插件\传奇\bin\Debug\Magick.NET-Q16-AnyCPU.dll
+E:\qq\QQ插件\传奇\bin\Debug\Magick.NET.Core.dll
+E:\qq\QQ插件\传奇\bin\Debug\Magick.NET-Q16-AnyCPU.xml
+E:\qq\QQ插件\传奇\bin\Debug\Magick.NET.Core.xml
+E:\qq\QQ插件\传奇\obj\Debug\传奇.csproj.AssemblyReference.cache
+E:\qq\QQ插件\传奇\obj\Debug\传奇.csproj.CoreCompileInputs.cache
+E:\qq\QQ插件\传奇\obj\Debug\传奇.csproj.Up2Date
+E:\qq\QQ插件\传奇\obj\Debug\传奇.MQ.pdb
+E:\qq\QQ插件\传奇\obj\Debug\传奇.MQ.exe
+E:\qq\QQ插件\传奇\bin\Debug\传奇.MQ.exe

@@ -1,0 +1,15 @@
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\QiancaoSelfTest.exe.config
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\QiancaoSelfTest.exe
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\QiancaoSelfTest.pdb
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\传奇.MQ.exe
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\Magick.NET-Q16-AnyCPU.dll
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\Magick.NET.Core.dll
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\传奇.MQ.pdb
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\Magick.NET-Q16-AnyCPU.xml
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\bin\Debug\net472\Magick.NET.Core.xml
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\obj\Debug\net472\QiancaoSelfTest.csproj.AssemblyReference.cache
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\obj\Debug\net472\QiancaoSelfTest.GeneratedMSBuildEditorConfig.editorconfig
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\obj\Debug\net472\QiancaoSelfTest.csproj.CoreCompileInputs.cache
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\obj\Debug\net472\QiancaoS.E2CD1C6C.Up2Date
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\obj\Debug\net472\QiancaoSelfTest.exe
+E:\qq\QQ插件\传奇\.workbuddy\tools\selftest\obj\Debug\net472\QiancaoSelfTest.pdb

@@ -1,0 +1,21 @@
+﻿[PASS] Native.Init 注入假回调
+[PASS] ParseMessage 解析消息帧 -> GROUP_AT_MESSAGE_CREATE/ABC123/U1
+[PASS] ParseMessage 拒绝非法 JSON
+[PASS] ParseMessage 拒绝空串
+[PASS] UserKeyOf 净化 openid -> AB_C_1_7
+[PASS] 规则表规模 -> 215
+[PASS] KeyOf(1) 取原命令词 -> 屏蔽本群
+[PASS] KeyOf(0)/越界返回空
+[PASS] 规则表含菜单及其 fun -> 6
+[PASS] get_plugin_info 返回 JSON
+[PASS] fun 是数字不是字符串
+[PASS] 规则分组齐全
+[PASS] 未导出 sdk 版本字段
+[PASS] SendMessageEx -> api 2 参数顺序 -> api=2 appid=1020 a1=0 a2=ABC123 a3=pong a4=MSGID2 a5=false a6=true
+[PASS] GetUserName -> api 9 -> api=9 appid=1020 a1=U1 a2=true a3= a4= a5= a6=
+[PASS] OutLog -> api 1 -> api=1 appid=0 a1=selftest a2= a3= a4= a5= a6=
+[PASS] onMessagev3 恒返回 NULL
+[PASS] onMessagev3 分发到业务并产生 api 2 -> api=2 appid=1020 a1=0 a2=ABC123 a3=咕咕鸡传奇指令说明文档：http://47.115.223.113 a4=MSGID2 a5=false a6=true
+[PASS] NULL / 非法 JSON / 空串不崩
+
+PASS=19 FAIL=0
